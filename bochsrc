@@ -1,0 +1,3 @@
+display_library: sdl
+floppya: 1_44=bin/boot.img, status=inserted
+boot: floppy
