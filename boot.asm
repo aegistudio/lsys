@@ -41,11 +41,13 @@ bootSectorAdditions:
 		; = ceil(rootEntries * rootEntry.size / bytesPerSector).
 	data.areaBeginSector equ 33
 		; = rootEntry.areaBeginSector + rootEntry.areaSize
+	data.bytesPerCluster equ 0200h
+		; = bytesPerSector * sectorsPerCluster
 
 bootCodeBody:
 	; Initialize Segment Registers.
 	mov ax, cs
-	mov ds, ax
+	;mov ds, ax
 	mov es, ax
 	mov ss, ax
 
@@ -61,11 +63,6 @@ bootCodeBody:
 	mov bx, beginLoadingSystemLoader.length
 	call bootDisplayString
 
-	; Reset Floppy Driver
-	xor ah, ah
-	mov dl, byte[driverNumber]
-	int 13h
-	
 	; As BootSectorAddtions Have Been Loaded, Just Need To Find
 	; RootEntries Directly.
 	; Read To 512 bytes after.
@@ -129,18 +126,38 @@ bootCodeBody:
 		bootCodeBody.readLoader:
 		;If It's Already The Last Cluster, End Of Reading.
 		cmp ax, 0FF0h
-		jnl bootCodeBody.readLoader.end
+		jg bootCodeBody.readLoader.end
 
 		sub ax, 2		; The Bias Of Cluster In Data Area
 		mov dl, byte[sectorsPerCluster]
 		mul dl
 		add ax, data.areaBeginSector
-	; SectorId = data.areaBeginSector + sectorsPerCluster * (clusterId - 2)
-		
+		; SectorId = data.areaBeginSector 
+		;	+ sectorsPerCluster * (clusterId - 2)
+		mov cx, ax
+		mov al, byte[sectorsPerCluster]
+		mov bx, word[loader.memoryPointer]
+			; ES:BX = loader.base + loader.memoryPointer
+		call bootReadSector
 
-		jmp bootCodeBody.readLoader
+		add word[loader.memoryPointer], data.bytesPerCluster
+
+		;jmp bootCodeBody.readLoader
 		bootCodeBody.readLoader.end:
-	jmp $
+	pop es
+	mov ax, loaderLaunching
+	mov bx, loaderLaunching.length
+	call bootDisplayString
+
+	jmp loader.base : loader.offset
+
+bootResetDriver:
+	pusha
+	xor ax, ax
+	mov dl, byte[driverNumber]
+	int 13h
+	popa
+	ret
 
 bootReadSector:
 	; Parameters:
@@ -152,6 +169,7 @@ bootReadSector:
 	; -	cylinderId * heads + headId = trackId.
 
 	pusha
+	call bootResetDriver
 	push ax
 
 	mov ax, cx	; Prepare Division For sectorId.
@@ -209,6 +227,8 @@ bootCodeConstants:
 	beginLoadingSystemLoader.length equ $ - beginLoadingSystemLoader
 	loaderNotFound db "Error: Loader Not Found!"
 	loaderNotFound.length equ $ - loaderNotFound
+	loaderLaunching db "Launching loader..."
+	loaderLaunching.length equ $ - loaderLaunching
 
 bootSectorFoot:
 	; Padding Up The Boot Sector With Zeros And End Sign.
