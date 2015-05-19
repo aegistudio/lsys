@@ -7,7 +7,7 @@ bin:
 
 loader.code:
 	@echo "Making Loader Binaries..."
-	@nasm loader.asm -o bin/loader.bin
+	@nasm boot/loader.asm -o bin/loader.bin
 
 loader.image: boot.sector.image loader.code
 	@echo "Writing Loader Into The Image"
