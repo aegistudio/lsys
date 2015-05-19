@@ -12,7 +12,7 @@ org 0100h
 	int 10h
 	jmp $
 
-	resb 800
+	resb 0300h
 
 	inLoaderNow db "You're now inside loader!!!"
 	inLoaderNow.length equ $ - inLoaderNow
