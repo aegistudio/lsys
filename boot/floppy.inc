@@ -2,6 +2,8 @@
 ;
 ;
 
+%ifdef __fat12header__
+
 floppy.resetDriver:
 	pusha
 	xor ax, ax
@@ -135,3 +137,7 @@ floppy.readFile:
 	pop bp
 	popa
 	ret
+
+%else
+	%error boot/fat12header.inc should be included before this file!
+%endif

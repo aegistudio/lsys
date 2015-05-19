@@ -18,7 +18,7 @@ loaderCode:
 	int 10h
 	jmp $
 
-	resb 0300h
+	%include "boot/floppy.inc"
 
 	inLoaderNow db "You're now inside loader!!!"
 	inLoaderNow.length equ $ - inLoaderNow

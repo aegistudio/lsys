@@ -7,6 +7,9 @@
 ; * -fied if a parameter in shared parameter has changed.)
 ;*****************************************************************
 
+%ifndef __fat12header__
+%define __fat12header__
+
 bootSectorAdditions:
 	; Additonal Information In Boot Sector.
 	oemName					db 'LHR'
@@ -47,3 +50,4 @@ bootSectorAdditions:
 	data.bytesPerCluster equ 0200h
 		; = bytesPerSector * sectorsPerCluster
 
+%endif
