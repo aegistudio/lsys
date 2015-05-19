@@ -87,6 +87,7 @@ bootCodeBody:
 		mov ax, word[es : di + 1ah]	; First Cluster Of Loader		
 		mov bx, loader.offset
 		call floppy.readFile
+		jmp $
 	pop es
 	mov ax, loaderLaunching
 	mov bx, loaderLaunching.length
