@@ -21,7 +21,7 @@ boot.sector.image: boot.sector.code boot.raw.image
 
 boot.sector.code:
 	@echo "Making Boot Sector Binaries..."
-	@nasm boot.asm -o bin/boot.bin
+	@nasm boot/boot.asm -o bin/boot.bin
 
 boot.raw.image:
 	@echo "Creating Raw Image Of Boot Sector..."
