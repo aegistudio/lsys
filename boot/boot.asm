@@ -40,7 +40,7 @@ bootCodeBody:
 		inc word[rootEntry.areaSectorCounter]
 		mov ax, 1
 		mov bx, loader.offset
-		call bootReadSector
+		call floppy.readSector
 
 		; Initializing Comparison
 		mov si, loaderFileName
@@ -101,7 +101,7 @@ bootCodeBody:
 		mov al, byte[sectorsPerCluster]
 		mov bx, word[loader.memoryPointer]
 			; ES:BX = loader.base + loader.memoryPointer
-		call bootReadSector
+		call floppy.readSector
 
 		add word[loader.memoryPointer], data.bytesPerCluster
 
@@ -132,7 +132,7 @@ bootCodeBody:
 		mov ax, loader.fatBuffer	; Buffer = ES : BX = 8000 : 0000
 		mov es, ax
 		mov ax, 2
-		call bootReadSector
+		call floppy.readSector
 		
 		mov si, word[loader.fatIndexInTable]
 		mov dx, word[loader.fatIndexInTable]
@@ -157,50 +157,7 @@ bootCodeBody:
 
 	jmp loader.base : loader.offset
 
-bootResetDriver:
-	pusha
-	xor ax, ax
-	mov dl, byte[driverNumber]
-	int 13h
-	popa
-	ret
-
-bootReadSector:
-	; Parameters:
-	; -	AL = sectors to read
-	; -	CX = sectorId
-	; -	ES:BX = buffer
-	; Equations:
-	; -	sectorPerTrack * trackId + (beginSector - 1) = sectorId.
-	; -	cylinderId * heads + headId = trackId.
-
-	pusha
-	call bootResetDriver
-	push ax
-
-	mov ax, cx	; Prepare Division For sectorId.
-	mov dx, word[sectorsPerTrack]
-	div dl		; AL = trackId, AH = beginSector - 1
-	inc ah		; AH = beginSector
-	mov cl, ah	; CL = beginSector
-
-	xor ah, ah	; AX = trackId
-	mov dx, word[heads]
-	div dl		; AL = cylinderId, AH = headId
-	mov ch, al	; CH = cylinderId
-	mov dh, ah	; DH = headId
-	mov dl, byte[driverNumber]
-
-	bootReadSector.reading:
-		pop ax		; Number Of Sectors To Read.
-		push ax
-		mov ah, 02h	; Using Read Sector Function.
-		int 13h		; Interrupt Floppy I/O.
-	jc bootReadSector.reading	;While Reading Fault, Repeat.
-
-	pop ax
-	popa
-	ret
+%include "boot/floppy.inc"
 
 bootDisplayString:
 	; Parameters:

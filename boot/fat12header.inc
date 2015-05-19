@@ -1,3 +1,12 @@
+;*****************************************************************
+; *                     boot/fat12header.inc
+; * @Title: fat12 header assembly include file
+; * @Author: LuoHaoran
+; * @Description: This file defines some shared parameter of boot
+; * sector and bios parameter block (some parameters should be modi
+; * -fied if a parameter in shared parameter has changed.)
+;*****************************************************************
+
 bootSectorAdditions:
 	; Additonal Information In Boot Sector.
 	oemName					db 'LHR'
