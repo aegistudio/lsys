@@ -155,12 +155,15 @@ bootCodeBody:
 		shr ax, 1
 		mov dl, 3
 		mul dl
-		mov dx, word[bytesPerSector]
-		shl dx, 1			; DX = bytesPerSector<<1
-		div dl
-		jmp $
-		mov byte[loader.fatIndexInTable], ah	; AH = fatIndexInTable
-		add ax, word[reservedSectors]	; AL = fatTableToLoad
+		mov bx, word[bytesPerSector]
+		shl bx, 1			; DX = bytesPerSector<<1
+		div bx
+
+		; This is a regulation for division. (Error Not Known)
+		sub ax, 00c0h
+
+		mov word[loader.fatIndexInTable], dx	; DX = fatIndexInTable
+		add ax, word[reservedSectors]	; AX = fatTableToLoad
 
 		mov cl, al
 		mov bx, 0000h
@@ -170,12 +173,16 @@ bootCodeBody:
 		call bootReadSector
 		
 		mov si, word[loader.fatIndexInTable]
-		mov ax, word[es : si]
 		mov dx, word[loader.fatIndexInTable]
 		and dx, 01h
 		jz bootCode.fatIndexEven
-		shr ax, 12d		;Right Shift 12 bit When Is Odd
+		bootCode.fatIndexOdd:
+			mov ax, word[es : si + 1]
+			shr ax, 4d		;Right Shift 4 bit When Is Odd
+			jmp bootCode.fatIndexEnd
 		bootCode.fatIndexEven:
+			mov ax, word[es : si]
+		bootCode.fatIndexEnd:
 		and ax, 0FFFh		;Masking 12 Bit.
 
 		pop es
@@ -257,7 +264,7 @@ bootCodeConstants:
 		; Pointer To The Bottom Of The Loaded Code.
 	loader.currentCluster dw 0000h
 		; The Current Cluster Of The Loader.
-	loader.fatIndexInTable db 00h
+	loader.fatIndexInTable dw 0000h
 		; The Next Cluster Of The Loader.
 	loader.fatBuffer equ 08000h
 
