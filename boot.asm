@@ -125,6 +125,7 @@ bootCodeBody:
 
 		bootCodeBody.readLoader:
 		;If It's Already The Last Cluster, End Of Reading.
+		mov word[loader.currentCluster], ax
 		cmp ax, 0FF0h
 		jg bootCodeBody.readLoader.end
 
@@ -142,6 +143,42 @@ bootCodeBody:
 
 		add word[loader.memoryPointer], data.bytesPerCluster
 
+		; Now Read Into The FatTable.
+		; Equations:
+		; - byteIndexInFat = (word[loader.currentCluster] >> 1) * 3
+		; 	= currentCluster >> 1 + currentCluster
+		; fatTableToLoad = reservedSectors 
+		;	+ (byteIndexInFat / (bytesPerSector<<1))
+		; fatIndexInTable = byteIndexInFat % (bytesPerSector<<1)
+		push es
+		mov ax, word[loader.currentCluster]
+		shr ax, 1
+		mov dl, 3
+		mul dl
+		mov dx, word[bytesPerSector]
+		shl dx, 1			; DX = bytesPerSector<<1
+		div dl
+		jmp $
+		mov byte[loader.fatIndexInTable], ah	; AH = fatIndexInTable
+		add ax, word[reservedSectors]	; AL = fatTableToLoad
+
+		mov cl, al
+		mov bx, 0000h
+		mov ax, loader.fatBuffer	; Buffer = ES : BX = 8000 : 0000
+		mov es, ax
+		mov ax, 2
+		call bootReadSector
+		
+		mov si, word[loader.fatIndexInTable]
+		mov ax, word[es : si]
+		mov dx, word[loader.fatIndexInTable]
+		and dx, 01h
+		jz bootCode.fatIndexEven
+		shr ax, 12d		;Right Shift 12 bit When Is Odd
+		bootCode.fatIndexEven:
+		and ax, 0FFFh		;Masking 12 Bit.
+
+		pop es
 		;jmp bootCodeBody.readLoader
 		bootCodeBody.readLoader.end:
 	pop es
@@ -217,7 +254,12 @@ bootCodeConstants:
 	loader.base equ 09000h
 	loader.offset equ 0100h
 	loader.memoryPointer dw 0100h
-		;Pointer To The Bottom Of The Loaded Code.
+		; Pointer To The Bottom Of The Loaded Code.
+	loader.currentCluster dw 0000h
+		; The Current Cluster Of The Loader.
+	loader.fatIndexInTable db 00h
+		; The Next Cluster Of The Loader.
+	loader.fatBuffer equ 08000h
 
 	rootEntry.areaSectorCounter dw rootEntry.areaBeginSector
 	rootEntry.alignmentMask equ 0FFE0h
