@@ -186,7 +186,7 @@ bootCodeBody:
 		and ax, 0FFFh		;Masking 12 Bit.
 
 		pop es
-		;jmp bootCodeBody.readLoader
+		jmp bootCodeBody.readLoader
 		bootCodeBody.readLoader.end:
 	pop es
 	mov ax, loaderLaunching
