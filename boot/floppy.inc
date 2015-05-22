@@ -91,20 +91,16 @@ floppy.readFile:
 		; Now Read Into The FatTable.
 		; Equations:
 		; - byteIndexInFat = (word[currentCluster] >> 1) * 3
-		; 	= currentCluster >> 1 + currentCluster
-		; fatTableToLoad = reservedSectors 
-		;	+ (byteIndexInFat / (bytesPerSector<<1))
-		; fatIndexInTable = byteIndexInFat % (bytesPerSector<<1)
+		; - fatTableToLoad = reservedSectors 
+		;	+ (byteIndexInFat / (bytesPerSector))
+		; - fatIndexInTable = byteIndexInFat % (bytesPerSector)
 		mov ax, word[bp - floppy.readFile.currentCluster]
 		shr ax, 1
 		mov dl, 3
 		mul dl
 		mov bx, word[bytesPerSector]
-		shl bx, 1			; DX = bytesPerSector<<1
+		mov dx, 0
 		div bx
-
-		; This is a regulation for division. (Error Not Known)
-		sub ax, 00c0h
 
 		mov word[bp - floppy.readFile.fatIndexInTable], dx	; DX = fatIndexInTable
 		add ax, word[reservedSectors]	; AX = fatTableToLoad
