@@ -18,6 +18,8 @@ loaderCode:
 	int 10h
 	jmp $
 
+	resb 900
+
 	%include "boot/floppy.inc"
 
 	inLoaderNow db "You're now inside loader!!!"

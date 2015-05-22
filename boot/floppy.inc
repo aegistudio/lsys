@@ -114,9 +114,11 @@ floppy.readFile:
 		call floppy.readSector
 		
 		mov si, word[bp - floppy.readFile.fatIndexInTable]
-		mov dx, word[bp - floppy.readFile.fatIndexInTable]
-		and dx, 01h
-		jz floppy.readFile.fatIndexEven
+		mov dx, word[bp - floppy.readFile.currentCluster]
+
+		and dl, 01h
+		cmp dl, 0
+		je floppy.readFile.fatIndexEven
 		floppy.readFile.fatIndexOdd:
 			mov ax, word[es : si + 1]
 			shr ax, 4d		;Right Shift 4 bit When Is Odd
@@ -125,7 +127,9 @@ floppy.readFile:
 			mov ax, word[es : si]
 		floppy.readFile.fatIndexEnd:
 		and ax, 0FFFh		;Masking 12 Bit.
+
 		pop es
+
 		jmp floppy.readFile.loop
 	floppy.readFile.loop.end:
 
