@@ -94,7 +94,6 @@ bootCodeBody:
 
 	jmp loader.base : loader.offset
 
-%define __no_find_directory__
 %include "boot/floppy.inc"
 
 bootDisplayString:

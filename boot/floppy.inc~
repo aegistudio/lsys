@@ -49,7 +49,6 @@ floppy.readSector:
 	popa
 	ret
 
-%ifndef __no_read_file__
 floppy.readFile:
 	floppy.readFile.currentCluster equ 2	; word[bp - currentCluster]
 	floppy.readFile.memoryPointer equ 4	; word[bp - memoryPointer]
@@ -138,8 +137,6 @@ floppy.readFile:
 	pop bp
 	popa
 	ret
-%endif
-
 %ifndef __no_find_directory__
 floppy.findDirectory:
 	floppy.findDirectory.returnValue equ 2

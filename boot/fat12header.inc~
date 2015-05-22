@@ -45,8 +45,6 @@ bootSectorAdditions:
 		; = bytesPerSector / rootEntry.size
 	rootEntry.areaSize equ 14
 		; = ceil(rootEntries * rootEntry.size / bytesPerSector).
-	rootEntry.alignmentMask equ 0FFE0h
-
 	data.areaBeginSector equ 33
 		; = rootEntry.areaBeginSector + rootEntry.areaSize
 	data.bytesPerCluster equ 0200h
