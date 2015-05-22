@@ -18,7 +18,7 @@ loaderCode:
 	int 10h
 	jmp $
 
-	resb 900
+	resb 3000h
 
 	%include "boot/floppy.inc"
 
