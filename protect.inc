@@ -24,12 +24,12 @@ privilege.application		equ	3
 ; * @Param address the address bias from the descriptor to baseline
 ; * of local descriptor table or global descriptor table.
 ; * @Param attribute the attributes for the selector
-*********************************************************************
+;*********************************************************************
 selector.local 		equ		4
 selector.global		equ		0
-%marco selector 2
+%macro selector 2
 	dw	(%1 & 0fff8h) | %2
-%endmarco
+%endmacro
 
 ;********************************************************************
 ; * @Name: descriptor(word base, word limit, dword attribute, byte dpl)
@@ -79,7 +79,7 @@ descriptor.gran.4kb		equ	8000h
 descriptor.none			equ	0000h
 descriptor.available		equ	1000h
 
-%marco descriptor 4
+%macro descriptor 4
 	dw	%2 & 0ffffh		;b0~b1: limit[0:15]
 	dw	%1 & 0ffffh		;b2~b3: base[0:15]
 	db	(%1 >> 16) & 0ffh	;b4: base[16:23]
@@ -88,4 +88,4 @@ descriptor.available		equ	1000h
 	db	((%3 >> 8) & 0f0h) | (%2 >> 8) & 0fh
 			;b6: attribute[12:15] << 4 | limit[16:19]
 	db	(%1>>24) & 0ffh		;b7: base[24:31]
-%endmarco
+%endmacro

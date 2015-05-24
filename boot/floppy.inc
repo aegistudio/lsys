@@ -163,7 +163,11 @@ floppy.findDirectory:
 	; -	DS : DX = the file name to find.
 	; -	ES : BX = the buffer.
 
-	pusha
+	push di
+	push si
+	push dx
+	push cx
+	push bx
 	push bp
 	mov bp, sp
 	sub sp, floppy.findDirectory.stackLimit
@@ -171,6 +175,7 @@ floppy.findDirectory:
 	mov word[bp - floppy.findDirectory.areaSectorCounter], cx
 	mov word[bp - floppy.findDirectory.areaBound], ax
 	mov word[bp - floppy.findDirectory.offset], bx
+	mov word[bp - floppy.findDirectory.fileName], dx
 
 	floppy.findDirectory.reading:
 	; Load A Sector Into Memory
@@ -214,18 +219,20 @@ floppy.findDirectory:
 		and di, rootEntry.alignmentMask
 			; = ES + DI & Align = loader.base + DI & Align
 		mov ax, word[es : di + 1ah]	; First Cluster Of Loader		
-		mov word[bp - floppy.findDirectory.returnValue], ax
 		jmp short floppy.findDirectory.return
 
 	floppy.findDirectory.notFound:
-		mov word[bp - floppy.findDirectory.returnValue], 0
+		mov ax, 0
 		jmp short floppy.findDirectory.return
 
 	floppy.findDirectory.return:
 		add sp, floppy.findDirectory.stackLimit
 		pop bp
-		popa
-		mov ax, word[bp - floppy.findDirectory.returnValue]
+		pop bx
+		pop cx
+		pop dx
+		pop si
+		pop di
 		ret
 %endif
 
