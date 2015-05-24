@@ -21,7 +21,7 @@ assemble.image: boot.sector.image loader.code kernel.code
 kernel.code:
 	@echo "Compiling The Code Of Loader..."
 	@gcc -c kernel/kernel.c -o bin/kernel/kernel.obj
-	@ld bin/kernel/kernel.obj -o bin/kernel/kernel.elf --oformat elf32-i386
+	@ld bin/kernel/kernel.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main
 
 boot.sector.image: boot.sector.code boot.raw.image
 	@echo "Writting Boot Sector Binaries To Image..."
