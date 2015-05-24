@@ -43,7 +43,7 @@ bootCodeBody:
 		call floppy.readSector
 
 		; Initializing Comparison
-		mov si, loaderFileName
+		mov si, loader.bin
 		mov di, loader.offset
 		cld
 
@@ -66,7 +66,7 @@ bootCodeBody:
 		bootCodeBody.rootEntryComparison.notTheSame:
 			and di, rootEntry.alignmentMask
 			add di, rootEntry.size
-			mov si, loaderFileName
+			mov si, loader.bin
 			jmp bootCodeBody.rootEntryComparison
 
 		bootCodeBody.rootEntryComparison.end:
@@ -95,6 +95,7 @@ bootCodeBody:
 	jmp loader.base : loader.offset
 
 %define __no_find_directory__
+%define __no_kill_motor__
 %include "boot/floppy.inc"
 
 bootDisplayString:
@@ -120,7 +121,7 @@ bootCodeConstants:
 
 	rootEntry.areaSectorCounter dw rootEntry.areaBeginSector
 
-	loaderFileName db "LOADER  BIN"
+	loader.bin db "LOADER  BIN"
 	beginLoadingSystemLoader db "Loading system loader..."
 	beginLoadingSystemLoader.length equ $ - beginLoadingSystemLoader
 	loaderNotFound db "Error: Loader Not Found!"

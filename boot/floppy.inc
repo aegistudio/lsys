@@ -1,9 +1,15 @@
-;*********************************************************
-;
-;
+;*****************************************************************
+; *			boot/floppy.inc
+; * @Title: floppy function assembly include file
+; * @Author: LuoHaoran
+; * @Description: This file defines some shared function for floppy
+; * device operations. Using __no_***__ marcos can intelligently
+; * disable some function from writting to the code.
+;*****************************************************************
 
 %ifdef __fat12header__
 
+%ifndef __no_reset_driver__
 floppy.resetDriver:
 	pusha
 	xor ax, ax
@@ -11,7 +17,9 @@ floppy.resetDriver:
 	int 13h
 	popa
 	ret
+%endif
 
+%ifndef __no_read_sector__
 floppy.readSector:
 	; Parameters:
 	; -	AL = sectors to read
@@ -48,6 +56,7 @@ floppy.readSector:
 	pop ax
 	popa
 	ret
+%endif
 
 %ifndef __no_read_file__
 floppy.readFile:
@@ -218,6 +227,16 @@ floppy.findDirectory:
 		popa
 		mov ax, word[bp - floppy.findDirectory.returnValue]
 		ret
+%endif
+
+%ifndef __no_kill_motor__
+floppy.killMotor:
+	pusha
+	mov dx, 03f2h
+	mov al, byte[driverNumber]
+	out dx, al
+	popa
+	ret
 %endif
 
 %else
