@@ -137,6 +137,8 @@ loaderCode16:
 	or eax, 1
 	mov cr0, eax
 
+	mov ax, selector.flat_data
+
 	jmp dword selector.flat_code : loaderCode32
 
 loader.displayString16:
@@ -206,11 +208,11 @@ gdt.flat_code	descriptor	loader.physic_address, 0fffffh,		\
 	descriptor.code32 | descriptor.code.readable |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
-gdt.flat_data	descriptor	0,	0fffffh,	\
+gdt.flat_data	descriptor	loader.physic_address,	0fffffh,	\
 	descriptor.data32 | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
-gdt.video	descriptor	0,	00ffffh,	\
+gdt.video	descriptor	0b8000h,	00ffffh,	\
 	descriptor.data16 | descriptor.data.readwrite |\
 	descriptor.gran.byte | descriptor.present,\
 	privilege.user
@@ -227,7 +229,7 @@ selector.flat_code	equ	(gdt.flat_code - gdt.base)|\
 selector.flat_data	equ	(gdt.flat_data - gdt.base)|\
 	selector.global | privilege.kernel
 selector.video		equ	(gdt.video - gdt.base)|\
-	selector.global | privilege.kernel
+	selector.global | privilege.user
 
 ;***********************************************************************
 ; *			32 Bit Protected Mode
@@ -237,4 +239,14 @@ selector.video		equ	(gdt.video - gdt.base)|\
 align 32
 bits 32
 loaderCode32:
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov eax, selector.video
+	mov gs, ax
+
+	mov ah, 0fh
+	mov al, 'F'
+	mov [gs:(39 * 2)], ax
+
 	jmp $
