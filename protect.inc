@@ -1,6 +1,6 @@
 ;********************************************************************
-; *			protection.inc
-; * @Title: protection mode critical assembly include file
+; *			protect.inc
+; * @Title: protected mode critical assembly include file
 ; * @Author: LuoHaoran
 ; * @Description: This file declares some constants and marcos for
 ; * segment descriptors, gate descriptors and selectors.
