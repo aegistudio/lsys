@@ -137,7 +137,7 @@ loaderCode16:
 	or eax, 1
 	mov cr0, eax
 
-	jmp dword selector.flat_code : (loader.physic_address + loaderCode32)
+	jmp dword selector.flat_code : loaderCode32
 
 loader.displayString16:
 	pusha
@@ -202,7 +202,7 @@ fail.length equ $ - fail
 ; Defining Descriptors
 ; Label		Type		Base	Limit	Attributes	Privilege
 gdt.base	descriptor	0,	0,	0,		privilege.kernel
-gdt.flat_code	descriptor	0,	0fffffh,	\
+gdt.flat_code	descriptor	loader.physic_address, 0fffffh,		\
 	descriptor.code32 | descriptor.code.readable |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
@@ -218,22 +218,23 @@ gdt.end:
 
 gdt.register:
 gdt.length	equ	gdt.end - gdt.base
-loader.physic_address equ loader.base * 10h + loader.offset
+loader.physic_address equ loader.base * 10h
 	dw	gdt.length - 1
 	dd	gdt.base + loader.physic_address
 
-selector.flat_code	equ	gdt.flat_code - gdt.base\
-	| selector.global | privilege.kernel
-selector.flat_data	equ	gdt.flat_data - gdt.base\
-	| selector.global | privilege.kernel
-selector.video		equ	gdt.video - gdt.base\
-	| selector.global | privilege.kernel
+selector.flat_code	equ	(gdt.flat_code - gdt.base)|\
+	selector.global | privilege.kernel
+selector.flat_data	equ	(gdt.flat_data - gdt.base)|\
+	selector.global | privilege.kernel
+selector.video		equ	(gdt.video - gdt.base)|\
+	selector.global | privilege.kernel
 
 ;***********************************************************************
 ; *			32 Bit Protected Mode
 ; * @Description: Now inside 32 bit protected mode of loader, addressing
 ; * uses 32bit virtual address and descriptors.
 ;***********************************************************************
+align 32
 bits 32
 loaderCode32:
 	jmp $
