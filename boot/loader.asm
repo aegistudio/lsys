@@ -6,19 +6,20 @@
 ; then translate to protected mode.
 ;********************************************************************
 bits 16
+loader.base 	equ 9000h
+loader.offset	equ 0100h
 org 0100h
-jmp loaderCode
+jmp loaderCode16
 nop
 
 %include "boot/fat12header.inc"
 %include "protect.inc"
 
-loaderCode:
+loaderCode16:
 	; Setup Registers
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
-	mov ss, ax
 
 	; Clear Screen
 	mov ax, 0600h
@@ -95,9 +96,45 @@ loaderCode:
 	mov bx, ok.length
 	call loader.writeToEnd
 
-	push es
+	mov ax, killingMotor
+	mov bx, killingMotor.length
+	call loader.displayString16
 
-	jmp $
+	mov ax, progress
+	mov bx, progress.length
+	call loader.writeToEnd
+
+	call floppy.killMotor
+
+	mov ax, ok
+	mov bx, ok.length
+	call loader.writeToEnd
+
+	mov ax, jumpingToProtectedMode
+	mov bx, jumpingToProtectedMode.length
+	call loader.displayString16
+
+	mov ax, progress
+	mov bx, progress.length
+	call loader.writeToEnd
+
+	; Setting Up Protected Mode
+
+	; Load Global Descriptor Table Pointer
+	lgdt [gdt.register]
+
+	; Open A20 Address Line
+	cli
+	in al, 92h
+	or al, 10b
+	out 92h, al
+
+	; Set Control Register 0 : Protected = 1.
+	mov eax, cr0
+	or eax, 1
+	mov cr0, eax
+
+	jmp dword selector.flat_code : loader.physic_address + loaderCode32
 
 loader.displayString16:
 	pusha
@@ -107,8 +144,12 @@ loader.displayString16:
 	mov ax, 01301h
 	mov bx, 0007
 	mov dx, word[loader.displayString.cursor]
-	add word[loader.displayString.cursor], loader.displayString.lineLength
+	push dx
 	int 10h
+	pop dx
+	add dx, loader.displayString.lineLength
+	and dx, 1fffh
+	mov word[loader.displayString.cursor], dx
 	pop bp
 	popa
 	ret
@@ -142,6 +183,12 @@ findingKernel.length equ $ - findingKernel
 loadingKernel db "Loading kernel..."
 loadingKernel.length equ $ - loadingKernel
 
+killingMotor db "Killing floppy motor..."
+killingMotor.length equ $ - killingMotor
+
+jumpingToProtectedMode db "Jumping to protected mode..."
+jumpingToProtectedMode.length equ $ - jumpingToProtectedMode
+
 progress db "      [    ]"
 progress.length equ $ - progress
 ok db "      [ OK ]"
@@ -149,9 +196,38 @@ ok.length equ $ - ok
 fail db "      [FAIL]"
 fail.length equ $ - fail
 
+; Defining Descriptors
+; Label		Type		Base	Limit	Attributes	Privilege
+gdt.base	descriptor	0,	0,	0,		privilege.kernel
+gdt.flat_code	descriptor	0,	0fffffh,	\
+	descriptor.code32 | descriptor.code.readable | descriptor.gran.4kb,\
+	privilege.kernel
+gdt.flat_data	descriptor	0,	0fffffh,	\
+	descriptor.data32 | descriptor.data.readwrite | descriptor.gran.4kb,\
+	privilege.kernel
+gdt.video	descriptor	0,	00ffffh,	\
+	descriptor.data16 | descriptor.data.readwrite | descriptor.gran.byte,\
+	privilege.user
+gdt.end:
+
+gdt.register:
+gdt.length	equ	gdt.end - gdt.base
+loader.physic_address equ loader.base * 10h + loader.offset
+	dw	gdt.length - 1
+	dd	gdt.base + loader.physic_address
+
+selector.flat_code	equ	gdt.flat_code - gdt.base\
+	| selector.global | privilege.kernel
+selector.flat_data	equ	gdt.flat_data - gdt.base\
+	| selector.global | privilege.kernel
+selector.video		equ	gdt.video - gdt.base\
+	| selector.global | privilege.kernel
+
 ;***********************************************************************
 ; *			32 Bit Protected Mode
 ; * @Description: Now inside 32 bit protected mode of loader, addressing
 ; * uses 32bit virtual address and descriptors.
 ;***********************************************************************
 bits 32
+loaderCode32:
+	jmp $

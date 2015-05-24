@@ -6,12 +6,12 @@
 ; * segment descriptors, gate descriptors and selectors.
 ;********************************************************************
 
-privilege.system		equ	0
-privilege.kernel		equ	0
-privilege.root_service		equ	1
-privilege.service		equ	2
-privilege.user			equ	3
-privilege.application		equ	3
+privilege.system		equ	00h
+privilege.kernel		equ	00h
+privilege.root_service		equ	01h
+privilege.service		equ	02h
+privilege.user			equ	03h
+privilege.application		equ	03h
 
 ;********************************************************************
 ; * @Name: selector(word address, byte attribute)
@@ -40,7 +40,8 @@ selector.global		equ		0
 ; * @Param attribute the attributes for the descriptor
 ; * @Param dpl the descriptor privilege level for the descriptor
 ;********************************************************************
-descriptor.data			equ	0010h
+descriptor.data32		equ	4010h
+descriptor.data16		equ	0010h
 descriptor.expdown4gb		equ	4014h
 descriptor.expdown64k		equ	0014h
 descriptor.stack32		equ	4010h
