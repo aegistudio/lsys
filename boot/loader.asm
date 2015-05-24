@@ -14,15 +14,25 @@ nop
 %include "protect.inc"
 
 loaderCode:
+	; Setup Registers
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
 
+	; Clear Screen
+	mov ax, 0600h
+	mov bx, 0700h
+	mov cx, 0000h
+	mov dx, 0184fh
+	int 10h
+
+	; Print Now Inside Loader
 	mov ax, nowInsideLoader
 	mov bx, nowInsideLoader.length
 	call loader.displayString16
 
+	;Print Finding Kernel
 	mov ax, findingKernel
 	mov bx, findingKernel.length
 	call loader.displayString16
@@ -31,6 +41,7 @@ loaderCode:
 	mov bx, progress.length
 	call loader.writeToEnd
 
+	; Finding kernel.elf In Root Directory
 	push es
 	mov ax, 0100h
 	mov es, ax
@@ -43,14 +54,41 @@ loaderCode:
 	cmp ax, 0
 	jne kernel.findSuccess
 
+	; kernel.elf Not Found
 	pop es
 	mov ax, fail
 	mov bx, fail.length
 	call loader.writeToEnd
 	jmp $
 
+	; kernel.elf Found
 	kernel.findSuccess:
+	mov dx, es
+	pop es
+	push ax
+
+	mov ax, ok
+	mov bx, ok.length
+	call loader.writeToEnd
+
+	; Display Loading Kernel
+	mov ax, loadingKernel
+	mov bx, loadingKernel.length
+	call loader.displayString16
+
+	mov ax, progress
+	mov bx, progress.length
+	call loader.writeToEnd
+
+	; Loading Kernel
+	pop ax
+	push es
 	mov es, dx
+	mov bx, 0
+
+	call floppy.readFile
+
+	mov dx,es
 	pop es
 
 	mov ax, ok
@@ -58,7 +96,6 @@ loaderCode:
 	call loader.writeToEnd
 
 	push es
-	mov es, dx
 
 	jmp $
 
@@ -96,7 +133,7 @@ loader.writeToEnd:
 
 kernel.elf db "KERNEL  ELF"
 
-nowInsideLoader db "You're now inside loader!!!"
+nowInsideLoader db "===================================LSYS 0.01===================================="
 nowInsideLoader.length equ $ - nowInsideLoader
 
 findingKernel db "Finding kernel..."
