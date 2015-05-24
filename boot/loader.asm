@@ -20,6 +20,9 @@ loaderCode16:
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
+	mov ss, ax
+	mov bp, loader.offset
+	mov sp, bp
 
 	; Clear Screen
 	mov ax, 0600h
@@ -126,7 +129,7 @@ loaderCode16:
 	; Open A20 Address Line
 	cli
 	in al, 92h
-	or al, 10b
+	or al, 00000010b
 	out 92h, al
 
 	; Set Control Register 0 : Protected = 1.
@@ -134,7 +137,7 @@ loaderCode16:
 	or eax, 1
 	mov cr0, eax
 
-	jmp dword selector.flat_code : loader.physic_address + loaderCode32
+	jmp dword selector.flat_code : (loader.physic_address + loaderCode32)
 
 loader.displayString16:
 	pusha
@@ -200,13 +203,16 @@ fail.length equ $ - fail
 ; Label		Type		Base	Limit	Attributes	Privilege
 gdt.base	descriptor	0,	0,	0,		privilege.kernel
 gdt.flat_code	descriptor	0,	0fffffh,	\
-	descriptor.code32 | descriptor.code.readable | descriptor.gran.4kb,\
+	descriptor.code32 | descriptor.code.readable |\
+	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
 gdt.flat_data	descriptor	0,	0fffffh,	\
-	descriptor.data32 | descriptor.data.readwrite | descriptor.gran.4kb,\
+	descriptor.data32 | descriptor.data.readwrite |\
+	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
 gdt.video	descriptor	0,	00ffffh,	\
-	descriptor.data16 | descriptor.data.readwrite | descriptor.gran.byte,\
+	descriptor.data16 | descriptor.data.readwrite |\
+	descriptor.gran.byte | descriptor.present,\
 	privilege.user
 gdt.end:
 
