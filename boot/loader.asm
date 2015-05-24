@@ -216,6 +216,10 @@ gdt.video	descriptor	0b8000h,	00ffffh,	\
 	descriptor.data16 | descriptor.data.readwrite |\
 	descriptor.gran.byte | descriptor.present,\
 	privilege.user
+gdt.stack	descriptor	loader.physic_address,	00ffffh,	\
+	descriptor.stack32 | descriptor.data.readwrite |\
+	descriptor.gran.4kb | descriptor.present,\
+	privilege.kernel
 gdt.end:
 
 gdt.register:
@@ -230,6 +234,8 @@ selector.flat_data	equ	(gdt.flat_data - gdt.base)|\
 	selector.global | privilege.kernel
 selector.video		equ	(gdt.video - gdt.base)|\
 	selector.global | privilege.user
+selector.stack		equ	(gdt.stack - gdt.base)|\
+	selector.global | privilege.kernel
 
 ;***********************************************************************
 ; *			32 Bit Protected Mode
@@ -244,9 +250,14 @@ loaderCode32:
 	mov fs, ax
 	mov eax, selector.video
 	mov gs, ax
+	mov eax, selector.stack
+	mov ss, ax
+	mov ebp, loader.offset
+	mov esp, ebp
+
 
 	mov ah, 0fh
 	mov al, 'F'
-	mov [gs:(39 * 2)], ax
+	mov word[gs:(39 * 2)], ax
 
 	jmp $
