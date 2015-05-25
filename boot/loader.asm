@@ -271,6 +271,22 @@ loaderCode32:
 	mov bx, ok.length
 	call loader.writeToEnd32
 
+	mov ax, settingUpPaging
+	mov bx, settingUpPaging.length
+	call loader.displayString32
+
+	mov ax, skip
+	mov bx, skip.length
+	call loader.writeToEnd32
+
+	mov ax, reallocatingKernel
+	mov bx, reallocatingKernel.length
+	call loader.displayString32
+
+	mov ax, progress
+	mov bx, progress.length
+	call loader.writeToEnd32
+
 	jmp $
 
 abcdefg db "ABCDEFG"
@@ -334,9 +350,12 @@ loader.print32:
 loader.displayString32:
 	pusha
 	mov edx, dword[ds : loader.displayString.cursor]
-	call loader.print32
+	shr edx, 2
+	and edx, 0ffffh
 	add edx, 0050h
-	mov dword[ds : loader.displayString.cursor], edx
+	mov cl, 0fh
+	call loader.print32
+	add word[ds : loader.displayString.cursor], 0140h
 	popa
 	ret
 
@@ -351,3 +370,12 @@ loader.writeToEnd32:
 	call loader.print32
 	popa
 	ret
+
+skip db "     [SKIP]"
+skip.length equ $ - skip
+
+settingUpPaging db "Setting up paging..."
+settingUpPaging.length equ $ - settingUpPaging
+
+reallocatingKernel db "Reallocating kernel..."
+reallocatingKernel.length equ $ - reallocatingKernel
