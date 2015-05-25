@@ -2,11 +2,15 @@
 ;			16 Bit Real Mode
 ; @Description: Now inside 16 bit real Mode Of Loader. Addressing uses
 ; 20 bit address line and segment registers. Now what we need to do is
-; loading kernel into 0100h:0000h, setup descriptors and page tables
+; loading kernel into 1000h:0000h, setup descriptors and page tables
 ; then translate to protected mode.
 ;********************************************************************
 loader.base 	equ 9000h
 loader.offset	equ 0100h
+kernel.base	equ 1000h
+kernel.offset	equ 0000h
+kernel.code.base equ 3000h
+kernel.code.offset equ 0400h
 org 0100h
 jmp loaderCode16
 nop
@@ -46,13 +50,13 @@ loaderCode16:
 
 	; Finding kernel.elf In Root Directory
 	push es
-	mov ax, 0100h
+	mov ax, kernel.base
 	mov es, ax
 
 	mov dx, kernel.elf
 	mov ax, rootEntry.areaSize + rootEntry.areaBeginSector
 	mov cx, rootEntry.areaBeginSector
-	mov bx, 0
+	mov bx, kernel.offset
 	call floppy.findDirectory
 	cmp ax, 0
 	jne kernel.findSuccess
@@ -87,11 +91,11 @@ loaderCode16:
 	pop ax
 	push es
 	mov es, dx
-	mov bx, 0
+	mov bx, kernel.offset
 
 	call floppy.readFile
 
-	mov dx,es
+	mov dx, es
 	pop es
 
 	mov ax, ok
