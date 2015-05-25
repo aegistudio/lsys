@@ -44,8 +44,6 @@ descriptor.data32		equ	4010h
 descriptor.data16		equ	0010h
 descriptor.expdown4gb		equ	4014h
 descriptor.expdown64k		equ	0014h
-descriptor.stack32		equ	4010h
-descriptor.stack16		equ	0010h
 descriptor.code32		equ	4018h
 descriptor.code16		equ	0018h
 descriptor.system		equ	0000h
@@ -62,11 +60,11 @@ descriptor.code.conform		equ	04h
 descriptor.system.286		equ	00h
 descriptor.system.386		equ	08h
 
-descriptor.system.tss		equ	01h
+descriptor.tss			equ	01h
 descriptor.system.busy		equ	02h
 descriptor.system.idle		equ	00h
 
-descriptor.system.ldt		equ	02h
+descriptor.ldt			equ	02h
 descriptor.gate.call		equ	04h
 descriptor.gate.interrupt	equ	06h
 descriptor.gate.trap		equ	07h
@@ -84,9 +82,22 @@ descriptor.available		equ	1000h
 	dw	%2 & 0ffffh		;b0~b1: limit[0:15]
 	dw	%1 & 0ffffh		;b2~b3: base[0:15]
 	db	(%1 >> 16) & 0ffh	;b4: base[16:23]
-	db	%3 & 0ffh | (%4 & 03h) << 5
+	db	(%3 & 0ffh) | ((%4 & 03h) << 5)
 			;b5: privilege << 5 | attribute[0:7]
-	db	((%3 >> 8) & 0f0h) | (%2 >> 16) & 0fh
+	db	((%3 >> 8) & 0f0h) | ((%2 >> 16) & 0fh)
 			;b6: attribute[12:15] << 4 | limit[16:19]
 	db	(%1>>24) & 0ffh		;b7: base[24:31]
+%endmacro
+
+;*******************************************************************
+; * @Name: gate(word selector, dword offset, byte param_count,
+; *	 dword attribute, byte dpl)
+; *****************************************************************
+%macro gate 4
+	dw	%2 & 0ffffh		;b0~b1: offset[0:15]
+	dw	%1			;b2~b3: selector
+	db	%3			;b4: param_count
+	db	(%3 & 0ffh) | ((%4 & 03h) << 5)
+			;b5: privilege << 5 | attribute[0:7]
+	dw	(%2 >> 16) & 0ffffh	;b5: offset[16:31]
 %endmacro

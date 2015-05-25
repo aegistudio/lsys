@@ -5,7 +5,6 @@
 ; loading kernel into 0100h:0000h, setup descriptors and page tables
 ; then translate to protected mode.
 ;********************************************************************
-bits 16
 loader.base 	equ 9000h
 loader.offset	equ 0100h
 org 0100h
@@ -146,20 +145,19 @@ loader.displayString16:
 	push bp
 	mov bp, ax
 	mov cx, bx
-	mov ax, 01301h
-	mov bx, 0007
+	mov ax, 1301h
+	mov bx, 000fh
 	mov dx, word[loader.displayString.cursor]
 	push dx
 	int 10h
 	pop dx
-	add dx, loader.displayString.lineLength
-	and dx, 1fffh
-	mov word[loader.displayString.cursor], dx
+	mov dx, word[loader.displayString.lineLength]
+	add word[loader.displayString.cursor], dx
 	pop bp
 	popa
 	ret
-	loader.displayString.cursor dw 0
-	loader.displayString.lineLength equ 80
+	loader.displayString.cursor dw 0000h
+	loader.displayString.lineLength dw 0100h
 
 loader.writeToEnd:
 	pusha
@@ -167,9 +165,12 @@ loader.writeToEnd:
 	mov bp, ax
 	mov cx, bx
 	mov ax, 01301h
-	mov bx, 0007
 	mov dx, word[loader.displayString.cursor]
-	sub dx, cx
+	sub dx, 0100h
+	mov bx, 0050h
+	sub bx, cx
+	or dx, bx
+	mov bx, 0007
 	int 10h
 	pop bp
 	popa
@@ -204,6 +205,10 @@ fail.length equ $ - fail
 ; Defining Descriptors
 ; Label		Type		Base	Limit	Attributes	Privilege
 gdt.base	descriptor	0,	0,	0,		privilege.kernel
+gdt.random_data descriptor	0,	0fffffh,	\
+	descriptor.data32 | descriptor.data.readwrite |\
+	descriptor.gran.4kb | descriptor.present,\
+	privilege.kernel
 gdt.flat_code	descriptor	loader.physic_address, 0fffffh,		\
 	descriptor.code32 | descriptor.code.readable |\
 	descriptor.gran.4kb | descriptor.present,\
@@ -217,7 +222,7 @@ gdt.video	descriptor	0b8000h,	00ffffh,	\
 	descriptor.gran.byte | descriptor.present,\
 	privilege.user
 gdt.stack	descriptor	loader.physic_address,	00ffffh,	\
-	descriptor.stack32 | descriptor.data.readwrite |\
+	descriptor.expdown4gb | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
 gdt.end:
@@ -228,6 +233,8 @@ loader.physic_address equ loader.base * 10h
 	dw	gdt.length - 1
 	dd	gdt.base + loader.physic_address
 
+selector.random_data	equ	(gdt.random_data - gdt.base)|\
+	selector.global | privilege.kernel
 selector.flat_code	equ	(gdt.flat_code - gdt.base)|\
 	selector.global | privilege.kernel
 selector.flat_data	equ	(gdt.flat_data - gdt.base)|\
@@ -243,7 +250,6 @@ selector.stack		equ	(gdt.stack - gdt.base)|\
 ; * uses 32bit virtual address and descriptors.
 ;***********************************************************************
 align 32
-bits 32
 loaderCode32:
 	mov ds, ax
 	mov es, ax
@@ -255,9 +261,22 @@ loaderCode32:
 	mov ebp, loader.offset
 	mov esp, ebp
 
-
-	mov ah, 0fh
-	mov al, 'F'
-	mov word[gs:(39 * 2)], ax
+	mov dh, 'e'
+	mov dl, 'F'
+	mov ebx, 0
+	call loader.putChar32
 
 	jmp $
+
+loader.putChar32:
+	; Parameter:
+	; 	dx = High 8 For Color, Low 8 For Character
+	;	ebx = The Position Of The Word On Buffer
+	pusha
+	shl ebx, 1
+	mov eax, dword[gs : ebx]
+	mov ah, dh
+	mov al, dl
+	mov dword[gs : ebx], eax
+	popa
+	ret
