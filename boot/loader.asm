@@ -222,7 +222,7 @@ gdt.video	descriptor	0b8000h,	00ffffh,	\
 	descriptor.gran.byte | descriptor.present,\
 	privilege.user
 gdt.stack	descriptor	loader.physic_address,	00ffffh,	\
-	descriptor.expdown4gb | descriptor.data.readwrite |\
+	descriptor.data32 | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
 gdt.putchar32.offset	equ	loader.putchar32 - $$
@@ -262,28 +262,73 @@ loaderCode32:
 	mov fs, ax
 	mov eax, selector.video
 	mov gs, ax
-	;mov eax, selector.stack
-	;mov ss, ax
-	;mov ebp, loader.offset
-	;mov esp, ebp
+	mov eax, selector.stack
+	mov ss, ax
+	mov ebp, loader.offset
+	mov esp, ebp
 
-	mov dh, 'e'
-	mov dl, 'F'
-	mov ebx, 0
-	;call selector.putchar32 : 0
-	call selector.flat_code : loader.putchar32
+	mov ax, abcdefg
+	mov bx, length
+	mov cx, 0eh
+	mov dx, 0
+	call loader.print32
 
 	jmp $
 
+abcdefg db "ABCDEFG"
+length equ $ - abcdefg
+
 loader.putchar32:
 	; Parameter:
-	; 	dx = High 8 For Color, Low 8 For Character
+	; 	dx = The Character To Print
 	;	ebx = The Position Of The Word On Buffer
-	pusha
+	push eax
 	shl ebx, 1
 	mov eax, dword[gs : ebx]
 	mov ah, dh
 	mov al, dl
 	mov dword[gs : ebx], eax
+	inc ebx
+	pop eax
+	ret
+
+loader.print32:
+	loader.print32.string equ 4d
+	loader.print32.limit equ 8d
+	loader.print32.color equ 12d
+	loader.print32.position equ 16d
+	loader.print32.stacklimit equ 16d
+	; Parameter:
+	; 	ds : eax = The Address Of The String
+	;	ebx = The Length Of The String
+	;	cl = The Color Of The String
+	;	edx = The Position Of The String
+	pusha
+	push ebp
+	mov ebp, esp
+	sub esp, loader.print32.stacklimit
+
+	mov dword[ss : (ebp - loader.print32.string)], eax
+	add ebx, eax
+	mov dword[ss : (ebp - loader.print32.limit)], ebx
+	mov byte[ss : (ebp - loader.print32.color)], cl
+	mov dword[ss : (ebp - loader.print32.position)], edx
+
+	loader.print32.print:
+	mov eax, dword[ss : (ebp - loader.print32.string)]
+	mov ebx, dword[ss : (ebp - loader.print32.limit)]
+	cmp eax, ebx
+	jge loader.print32.endprint
+	mov dl, byte[ds : eax]
+	mov dh, byte[ss : (ebp - loader.print32.color)]
+	mov ebx, dword[ss : (ebp - loader.print32.position)]
+	call loader.putchar32
+	inc dword[ss : (ebp - loader.print32.string)]
+	inc dword[ss : (ebp - loader.print32.position)]
+	jmp loader.print32.print
+
+	loader.print32.endprint
+	add esp, loader.print32.stacklimit
+	pop ebp
 	popa
 	ret
