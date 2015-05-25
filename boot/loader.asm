@@ -225,6 +225,10 @@ gdt.stack	descriptor	loader.physic_address,	00ffffh,	\
 	descriptor.expdown4gb | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
+gdt.putchar32.offset	equ	loader.putchar32 - $$
+gdt.putchar32	gate selector.flat_code, gdt.putchar32.offset, 0,	\
+	descriptor.system.386 | descriptor.gate.call | descriptor.present,\
+	privilege.kernel
 gdt.end:
 
 gdt.register:
@@ -243,6 +247,8 @@ selector.video		equ	(gdt.video - gdt.base)|\
 	selector.global | privilege.user
 selector.stack		equ	(gdt.stack - gdt.base)|\
 	selector.global | privilege.kernel
+selector.putchar32	equ	(gdt.putchar32 - gdt.base)|\
+	selector.global | privilege.kernel
 
 ;***********************************************************************
 ; *			32 Bit Protected Mode
@@ -256,19 +262,20 @@ loaderCode32:
 	mov fs, ax
 	mov eax, selector.video
 	mov gs, ax
-	mov eax, selector.stack
-	mov ss, ax
-	mov ebp, loader.offset
-	mov esp, ebp
+	;mov eax, selector.stack
+	;mov ss, ax
+	;mov ebp, loader.offset
+	;mov esp, ebp
 
 	mov dh, 'e'
 	mov dl, 'F'
 	mov ebx, 0
-	call loader.putChar32
+	;call selector.putchar32 : 0
+	call selector.flat_code : loader.putchar32
 
 	jmp $
 
-loader.putChar32:
+loader.putchar32:
 	; Parameter:
 	; 	dx = High 8 For Color, Low 8 For Character
 	;	ebx = The Position Of The Word On Buffer

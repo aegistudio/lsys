@@ -93,11 +93,11 @@ descriptor.available		equ	1000h
 ; * @Name: gate(word selector, dword offset, byte param_count,
 ; *	 dword attribute, byte dpl)
 ; *****************************************************************
-%macro gate 4
+%macro gate 5
 	dw	%2 & 0ffffh		;b0~b1: offset[0:15]
 	dw	%1			;b2~b3: selector
 	db	%3			;b4: param_count
-	db	(%3 & 0ffh) | ((%4 & 03h) << 5)
+	db	(%4 & 0ffh) | ((%5 & 03h) << 5)
 			;b5: privilege << 5 | attribute[0:7]
 	dw	(%2 >> 16) & 0ffffh	;b5: offset[16:31]
 %endmacro
