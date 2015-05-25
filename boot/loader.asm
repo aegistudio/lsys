@@ -267,11 +267,9 @@ loaderCode32:
 	mov ebp, loader.offset
 	mov esp, ebp
 
-	mov ax, abcdefg
-	mov bx, length
-	mov cx, 0eh
-	mov dx, 0
-	call loader.print32
+	mov ax, ok
+	mov bx, ok.length
+	call loader.writeToEnd32
 
 	jmp $
 
@@ -330,5 +328,26 @@ loader.print32:
 	loader.print32.endprint
 	add esp, loader.print32.stacklimit
 	pop ebp
+	popa
+	ret
+
+loader.displayString32:
+	pusha
+	mov edx, dword[ds : loader.displayString.cursor]
+	call loader.print32
+	add edx, 0050h
+	mov dword[ds : loader.displayString.cursor], edx
+	popa
+	ret
+
+loader.writeToEnd32:
+	pusha
+	mov cl, 07h
+	mov edx, dword[ds : loader.displayString.cursor]
+	shr edx, 2
+	and edx, 0ffffh
+	sub edx, ebx
+	add edx, 0050h
+	call loader.print32
 	popa
 	ret
