@@ -13,7 +13,9 @@ loader.code:
 
 assemble.image: boot.sector.image loader.code kernel.code
 	@echo "Writing Loader Into The Image..."
-	@sudo mount bin/boot.img /mnt
+	@sudo mount lsys.img /mnt
+	@sudo rm /mnt/loader.bin -f
+	@sudo rm /mnt/kernel.elf -f
 	@sudo cp bin/boot/loader.bin /mnt
 	@sudo cp bin/kernel/kernel.elf /mnt
 	@sudo umount /mnt
@@ -23,17 +25,17 @@ kernel.code:
 	@gcc -c kernel/kernel.c -o bin/kernel/kernel.obj
 	@ld bin/kernel/kernel.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main
 
-boot.sector.image: boot.sector.code boot.raw.image
+boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."
-	@dd if=bin/boot/boot.bin of=bin/boot.img count=1 conv=notrunc
+	@dd if=bin/boot/boot.bin of=lsys.img count=1 conv=notrunc
 
 boot.sector.code:
 	@echo "Making Boot Sector Binaries..."
 	@nasm boot/boot.asm -o bin/boot/boot.bin
 
-boot.raw.image:
-	@echo "Creating Raw Image Of Boot Sector..."
-	@bximage -fd -size=1.44 -q bin/boot.img
+lsys.img:
+	@echo "Creating Raw Image Of System Lsys..."
+	@bximage -fd -size=1.44 -q lsys.img
 
 clean: bin
 	@echo "Cleaning Up Legacy Output..."

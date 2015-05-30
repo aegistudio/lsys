@@ -1,2 +1,2 @@
-floppya: 1_44=bin/boot.img, status=inserted
+floppya: 1_44=lsys.img, status=inserted
 boot: floppy
