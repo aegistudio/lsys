@@ -63,7 +63,8 @@ floppy.readFile:
 	floppy.readFile.currentCluster equ 2	; word[bp - currentCluster]
 	floppy.readFile.memoryPointer equ 4	; word[bp - memoryPointer]
 	floppy.readFile.fatIndexInTable equ 6	; word[bp - fatIndexInTable]
-	floppy.readFile.reservedBlockSize equ 6	; stack.length
+	floppy.readFile.segmentPointer equ 10	; word[bp - segmentPointer]
+	floppy.readFile.reservedBlockSize equ 10	; stack.length
 
 	floppy.readFile.fatBufferBase equ 8000h
 	floppy.readFile.fatBufferOffset equ 0000h
@@ -77,6 +78,7 @@ floppy.readFile:
 	sub sp, floppy.readFile.reservedBlockSize
 
 	mov word[bp - floppy.readFile.memoryPointer], bx
+	mov word[bp - floppy.readFile.segmentPointer], es
 
 	floppy.readFile.loop:
 		;If It's Already The Last Cluster, End Of Reading.
@@ -92,11 +94,14 @@ floppy.readFile:
 		;	+ sectorsPerCluster * (clusterId - 2)
 		mov cx, ax
 		mov al, byte[sectorsPerCluster]
+		mov bx, word[bp - floppy.readFile.segmentPointer]
+		mov es, bx
 		mov bx, word[bp - floppy.readFile.memoryPointer]
 			; ES:BX = ES : floppy.readFile.memoryPointer
 		call floppy.readSector
 
-		add word[bp - floppy.readFile.memoryPointer], data.bytesPerCluster
+		add word[bp - floppy.readFile.memoryPointer], data.bytesPerCluster % 16
+		add word[bp - floppy.readFile.segmentPointer], data.bytesPerCluster / 16
 
 		; Now Read Into The FatTable.
 		; Equations:

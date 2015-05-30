@@ -39,7 +39,7 @@ lsys.img:
 
 clean: bin
 	@echo "Cleaning Up Legacy Output..."
-	@rm -r bin
+	@rm -r -f bin
 
 run: all
 	@echo "Running..."
