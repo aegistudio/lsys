@@ -383,3 +383,5 @@ settingUpPaging.length equ $ - settingUpPaging
 
 reallocatingKernel db "Reallocating kernel..."
 reallocatingKernel.length equ $ - reallocatingKernel
+
+%include "elf.inc"
