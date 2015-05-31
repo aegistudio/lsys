@@ -24,12 +24,14 @@ assemble.image: boot.sector.image loader.code kernel.code
 lib.code:
 	@echo "Compiling The Code Of Library..."
 	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
+	@nasm lib/video.asm -o bin/lib/video.obj -f elf32
 
 kernel.code: lib.code
 	@echo "Compiling The Code Of Kernel..."
 	@nasm kernel/kernel.asm -o bin/kernel/kernel.obj -f elf32
 	@gcc -c kernel/protect.c -I include -o bin/kernel/protect.obj
-	@ld bin/kernel/kernel.obj bin/kernel/protect.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
+	@gcc -c kernel/video.c -I include -o bin/kernel/video.obj
+	@ld bin/kernel/*.obj bin/lib/*.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."

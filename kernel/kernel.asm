@@ -1,5 +1,6 @@
 global kernel_main
 extern kernel_gdt_migration
+extern kernel_video_setup
 
 section .bss
 kernel.stack		resd	1024 * 2
@@ -20,4 +21,8 @@ kernel_main:
 	push old_gdt_pointer
 	call kernel_gdt_migration
 	lgdt [new_gdt_pointer]
+
+	; Setup Kernel Screen Environment
+	call kernel_video_setup
+
 	jmp $
