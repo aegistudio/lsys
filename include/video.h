@@ -17,8 +17,9 @@ __constant(video_alignment_right,	2);
 
 __video_h_export void video_set_cursor		(dword line, dword column);
 __video_h_export void video_clear_screen	();
-//__video_h_export void video_put_char		(byte character, byte color);
-//__video_h_export void video_put_string	(byte* string, byte color, dword alignment);
+__video_h_export void video_brush_screen	(dword and, dword or, dword begin_index, dword end_index);
+__video_h_export void video_put_char		(byte character, byte color);
+__video_h_export void video_put_string		(byte* string, byte color);
 //__video_h_export void video_line_move		(dword offset);
 //__video_h_export void video_column_move	(dword offset);
 

@@ -24,7 +24,8 @@ assemble.image: boot.sector.image loader.code kernel.code
 lib.code:
 	@echo "Compiling The Code Of Library..."
 	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
-	@nasm lib/video.asm -o bin/lib/video.obj -f elf32
+	@nasm lib/video_base.asm -o bin/lib/video_base.obj -f elf32
+	@gcc -c lib/video.c -I include/	-o bin/lib/video.obj
 
 kernel.code: lib.code
 	@echo "Compiling The Code Of Kernel..."
