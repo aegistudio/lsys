@@ -95,6 +95,15 @@ typedef struct __gate_t
 }
 gate;
 
+__segmentation_h_func__ dword gate_get_offset(gate* g);
+__segmentation_h_func__ void gate_set_offset(gate* g, dword offset);
+__segmentation_h_func__ selector gate_get_base(gate* g);
+__segmentation_h_func__ void gate_set_base(gate* g, selector base);
+__segmentation_h_func__ byte gate_get_parameter_count(gate* g);
+__segmentation_h_func__ void gate_set_parameter_count(gate* g, byte count);
+__segmentation_h_func__ dword gate_get_attribute(gate* g);
+__segmentation_h_func__ void gate_set_attribute(gate* g, dword attribute, dword privilege);
+
 __constant(descriptor_system_286		,	0x00);
 __constant(descriptor_system_386		,	0x08);
 
