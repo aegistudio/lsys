@@ -49,7 +49,7 @@ elf.ident.data.smallendian	equ	1	; Small-Endian
 elf.ident.data.bigendian	equ	2	; Big-Endian
 
 elf.program_header.base:
-	elf.program_header.type			resw	1
+	elf.program_header.type			resd	1
 	elf.program_header.memory_offset	resd	1
 	elf.program_header.virtual_address	resd	1
 	elf.program_header.physic_address	resd	1

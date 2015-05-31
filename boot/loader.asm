@@ -140,8 +140,6 @@ loaderCode16:
 	or eax, 1
 	mov cr0, eax
 
-	mov ax, selector.flat_data
-
 	jmp dword selector.flat_code : loaderCode32
 
 loader.displayString16:
@@ -221,7 +219,7 @@ gdt.flat_data	descriptor	loader.physic_address,	0fffffh,	\
 	descriptor.data32 | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
-gdt.video	descriptor	0b8000h,	00ffffh,	\
+gdt.video	descriptor	0b8000h,	0fffffh,	\
 	descriptor.data16 | descriptor.data.readwrite |\
 	descriptor.gran.byte | descriptor.present,\
 	privilege.user
@@ -233,14 +231,35 @@ gdt.putchar32.offset	equ	loader.putchar32 - $$
 gdt.putchar32	gate selector.flat_code, gdt.putchar32.offset, 0,	\
 	descriptor.system.386 | descriptor.gate.call | descriptor.present,\
 	privilege.kernel
+gdt.kernel.file	descriptor	kernel.physic_address, 0fffffh,	\
+	descriptor.data32 | descriptor.data.readwrite |\
+	descriptor.gran.4kb | descriptor.present,\
+	privilege.kernel
+gdt.kernel.memory	descriptor	0, 0fffffh,	\
+	descriptor.data32 | descriptor.data.readwrite |\
+	descriptor.gran.4kb | descriptor.present,\
+	privilege.kernel
+gdt.kernel.code		descriptor	kernel.code.physic_address, 0fffffh,	\
+	descriptor.code32 | descriptor.code.readable |\
+	descriptor.gran.4kb | descriptor.present,\
+	privilege.kernel
 gdt.end:
 
 gdt.register:
 gdt.length	equ	gdt.end - gdt.base
-loader.physic_address equ loader.base * 10h
 	dw	gdt.length - 1
 	dd	gdt.base + loader.physic_address
 
+loader.physic_address equ loader.base * 10h
+kernel.physic_address equ kernel.base * 10h
+kernel.code.physic_address equ kernel.code.base * 10h
+
+selector.kernel.file	equ	(gdt.kernel.file - gdt.base)|\
+	selector.global | privilege.kernel
+selector.kernel.memory	equ	(gdt.kernel.memory - gdt.base)|\
+	selector.global | privilege.kernel
+selector.kernel.code	equ	(gdt.kernel.code - gdt.base)|\
+	selector.global | privilege.kernel
 selector.random_data	equ	(gdt.random_data - gdt.base)|\
 	selector.global | privilege.kernel
 selector.flat_code	equ	(gdt.flat_code - gdt.base)|\
@@ -261,6 +280,7 @@ selector.putchar32	equ	(gdt.putchar32 - gdt.base)|\
 ;***********************************************************************
 align 32
 loaderCode32:
+	mov ax, selector.flat_data
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -271,27 +291,144 @@ loaderCode32:
 	mov ebp, loader.offset
 	mov esp, ebp
 
-	mov ax, ok
-	mov bx, ok.length
+	mov eax, ok
+	mov ebx, ok.length
 	call loader.writeToEnd32
 
-	mov ax, settingUpPaging
-	mov bx, settingUpPaging.length
+	mov eax, settingUpPaging
+	mov ebx, settingUpPaging.length
 	call loader.displayString32
 
-	mov ax, skip
-	mov bx, skip.length
+	mov eax, skip
+	mov ebx, skip.length
 	call loader.writeToEnd32
 
-	mov ax, reallocatingKernel
-	mov bx, reallocatingKernel.length
+	mov eax, reallocatingKernel
+	mov ebx, reallocatingKernel.length
 	call loader.displayString32
 
-	mov ax, progress
-	mov bx, progress.length
+	mov eax, progress
+	mov ebx, progress.length
 	call loader.writeToEnd32
 
-	jmp $
+	; Begin Analysing Of Kernel ELF File.
+	mov eax, selector.kernel.file
+	mov es, ax
+	mov eax, selector.kernel.memory
+	mov fs, ax
+
+	; Check Whether The Magic Number Of The ELF Is Valid.
+	mov eax, dword[es : (elf.ident.magic - elf.header.base)]
+	mov ebx, dword[ds : elf.ident.magic.answer]
+	cmp eax, ebx
+	jne loader.kernel_relocate.fail
+
+	; Interprete Program Header
+	mov eax, dword[es : (elf.program_header.offset - elf.header.base)]
+	mov dword[elf.program_header.offset], eax
+
+	mov eax, dword[es : (elf.program_header.entry.count - elf.header.base)]
+	and eax, 0000ffffh
+	mov dword[elf.program_header.entry.count], eax
+
+	; To Simplify We Only Have To Do Entry With PT_LOAD
+	loader.program_header.interprete:
+	mov eax, dword[ds : elf.program_header.entry.count]
+	mov ebx, dword[ds : loader.program_header.current_entry]
+	cmp ebx, eax
+	jge loader.program_header.interprete.end
+
+	mov ebx, dword[es : (elf.program_header.offset - elf.header.base)]
+	mov eax, dword[es : bx]
+
+	cmp eax, elf.program_header.type.load
+	jne loader.program_header.not_pt_load
+
+	; Do PT_LOAD Program Header
+		mov eax, dword[es : bx + (elf.program_header.virtual_address - elf.program_header.base)]
+		push ebx
+		mov ebx, gdt.kernel.memory
+		call descriptor.set_base
+		pop ebx
+		mov eax, selector.kernel.memory
+		mov fs, ax
+
+		; Clean Memory According To Memory_Size
+		mov eax, dword[es : bx + (elf.program_header.memory_size - elf.program_header.base)]
+		mov dword[ds : elf.program_header.memory_size], eax
+
+		push ebx
+		mov ebx, 0
+		loader.program_header.clean_memory:
+		mov eax, dword[ds : elf.program_header.memory_size]
+		cmp ebx, eax
+		jge loader.program_header.clean_memory.end
+		mov dword[fs : bx], 0
+		add ebx, 4
+		jmp loader.program_header.clean_memory
+		loader.program_header.clean_memory.end:
+		pop ebx
+
+		; Copy Memory According To File_Size
+		mov eax, dword[es : bx + (elf.program_header.file_size - elf.program_header.base)]
+		mov dword[ds : elf.program_header.file_size], eax
+
+		mov eax, dword[es : bx + (elf.program_header.memory_offset - elf.program_header.base)]
+		mov dword[ds : elf.program_header.memory_offset], eax
+
+		push ebx
+		loader.program_header.copy_file:
+		mov eax, dword[ds : elf.program_header.file_size]
+		mov ebx, dword[ds : loader.program_header.current_counter]
+		cmp ebx, eax
+		jge loader.program_header.copy_file.end
+		mov eax, dword[ds : elf.program_header.memory_offset]
+		add ebx, eax
+		mov eax, dword[es : ebx]
+		mov ebx, dword[ds : loader.program_header.current_counter]
+		mov dword[fs : ebx], eax
+		add dword[ds : loader.program_header.current_counter], 4
+		jmp loader.program_header.copy_file
+		loader.program_header.copy_file.end:
+		pop ebx		
+
+	loader.program_header.not_pt_load:
+	inc dword[loader.program_header.current_entry]
+	jmp loader.program_header.interprete
+	loader.program_header.interprete.end:
+
+	jmp loader.kernel_relocate.success
+
+	loader.program_header.current_entry dd 0
+	loader.program_header.current_counter dd 0
+
+	loader.kernel_relocate.fail:
+	mov eax, selector.flat_data
+	mov es, ax
+	mov fs, ax
+	mov eax, fail
+	mov ebx, fail.length
+	call loader.writeToEnd32
+
+	hlt
+
+	loader.kernel_relocate.success:
+	mov eax, selector.flat_data
+	mov es, ax
+	mov fs, ax
+	mov eax, ok
+	mov ebx, ok.length
+	call loader.writeToEnd32
+
+	mov eax, launchingKernel
+	mov ebx, launchingKernel.length
+	call loader.displayString32
+
+	mov eax, progress
+	mov ebx, progress.length
+	call loader.writeToEnd32
+
+	jmp selector.kernel.code : kernel.code.offset
 
 abcdefg db "ABCDEFG"
 length equ $ - abcdefg
@@ -383,5 +520,8 @@ settingUpPaging.length equ $ - settingUpPaging
 
 reallocatingKernel db "Reallocating kernel..."
 reallocatingKernel.length equ $ - reallocatingKernel
+
+launchingKernel db "Launching kernel..."
+launchingKernel.length equ $ - launchingKernel
 
 %include "elf.inc"
