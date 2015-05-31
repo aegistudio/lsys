@@ -89,27 +89,6 @@ descriptor.available		equ	1000h
 %endmacro
 
 ;*******************************************************************
-; @Name : descriptor.set_* manipulators
-; @Description: These functions are used to manipulate descriptors
-; in order to schedule or load program.
-; * EAX - The value to rewrite
-; * DS : BX - the base address of the descriptor to overwrite
-;*******************************************************************
-descriptor.set_base:
-	pusha
-	mov edx, dword[ds : bx + 2]
-	and edx, 0ff000000h
-	mov ecx, eax
-	and ecx,  00ffffffh
-	or edx, ecx
-	mov dword[ds : bx + 2], edx
-
-	shr ecx, 24
-	mov byte[ds : bx + 7], cl
-	popa
-ret
-
-;*******************************************************************
 ; * @Name: gate(word selector, dword offset, byte param_count,
 ; *	 dword attribute, byte dpl)
 ; *****************************************************************

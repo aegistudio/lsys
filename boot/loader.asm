@@ -346,14 +346,13 @@ loaderCode32:
 	and ecx, 0000ffffh
 	mul ecx
 	add ebx, eax
-	and ebx, 0000ffffh
-	mov eax, dword[es : bx]
+	mov eax, dword[es : ebx]
 
 	cmp eax, elf.program_header.type.load
 	jne loader.program_header.not_pt_load
 
 	; Do PT_LOAD Program Header
-		mov eax, dword[es : bx + (elf.program_header.virtual_address - elf.program_header.base)]
+		mov eax, dword[es : ebx + (elf.program_header.virtual_address - elf.program_header.base)]
 		push ebx
 		mov ebx, gdt.kernel.memory
 		call descriptor.set_base
@@ -362,7 +361,7 @@ loaderCode32:
 		mov fs, ax
 
 		; Clean Memory According To Memory_Size
-		mov eax, dword[es : bx + (elf.program_header.memory_size - elf.program_header.base)]
+		mov eax, dword[es : ebx + (elf.program_header.memory_size - elf.program_header.base)]
 		mov dword[ds : elf.program_header.memory_size], eax
 
 		push ebx
@@ -378,10 +377,10 @@ loaderCode32:
 		pop ebx
 
 		; Copy Memory According To File_Size
-		mov eax, dword[es : bx + (elf.program_header.file_size - elf.program_header.base)]
+		mov eax, dword[es : ebx + (elf.program_header.file_size - elf.program_header.base)]
 		mov dword[ds : elf.program_header.file_size], eax
 
-		mov eax, dword[es : bx + (elf.program_header.memory_offset - elf.program_header.base)]
+		mov eax, dword[es : ebx + (elf.program_header.memory_offset - elf.program_header.base)]
 		mov dword[ds : elf.program_header.memory_offset], eax
 
 		push ebx
@@ -437,7 +436,7 @@ loaderCode32:
 	call loader.writeToEnd32
 
 	; Random Access Will Be Required In Kernel, So Setup Random Access
-	mov ax, selector.random_data
+	mov eax, selector.random_data
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -525,6 +524,20 @@ loader.writeToEnd32:
 	call loader.print32
 	popa
 	ret
+
+descriptor.set_base:
+	pusha
+	mov edx, dword[ds : bx + 2]
+	and edx, 0ff000000h
+	mov ecx, eax
+	and ecx,  00ffffffh
+	or edx, ecx
+	mov dword[ds : ebx + 2], edx
+
+	shr ecx, 24
+	mov byte[ds : ebx + 7], cl
+	popa
+ret
 
 skip db "     [SKIP]"
 skip.length equ $ - skip
