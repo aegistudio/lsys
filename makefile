@@ -6,6 +6,7 @@ bin:
 	@mkdir bin
 	@mkdir bin/boot
 	@mkdir bin/kernel
+	@mkdir bin/lib
 
 loader.code:
 	@echo "Making Loader Binaries..."
@@ -20,11 +21,15 @@ assemble.image: boot.sector.image loader.code kernel.code
 	@sudo cp bin/kernel/kernel.elf /mnt
 	@sudo umount /mnt
 
-kernel.code:
-	@echo "Compiling The Code Of Loader..."
-	echo "@gcc -c kernel/kernel.c -o bin/kernel/kernel.obj"
-	@nasm kernel/wrapper.asm -o bin/kernel/kernel.obj -f elf32
-	@ld bin/kernel/kernel.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
+lib.code:
+	@echo "Compiling The Code Of Library..."
+	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
+
+kernel.code: lib.code
+	@echo "Compiling The Code Of Kernel..."
+	@nasm kernel/kernel.asm -o bin/kernel/kernel.obj -f elf32
+	@gcc -c kernel/protect.c -I include -o bin/kernel/protect.obj
+	@ld bin/kernel/kernel.obj bin/kernel/protect.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."
