@@ -40,27 +40,28 @@ void descriptor_set_base(descriptor *d, dword base)
 	d->base_high = (base & 0xff000000) >> 24;
 }
 
-word descriptor_get_attribute(descriptor *d)
+dword descriptor_get_attribute(descriptor *d)
 {
 	return (d->attribute_limit_high) & 0xf0ff;
 }
 
-void descriptor_set_attribute(descriptor *d, word attribute)
+void descriptor_set_attribute(descriptor *d, dword attribute, dword privilege)
 {
+	attribute |= (privilege & 0x03) << 5;
 	d->attribute_limit_high &= 0x0f00;
 	d->attribute_limit_high |= (attribute & 0xf0ff);
 }
 
-void descriptor_new(descriptor *d, dword base, dword limit, word attribute)
+void descriptor_new(descriptor *d, dword base, dword limit, dword attribute, dword privilege)
 {
 	descriptor_set_base(d, base);
 	descriptor_set_limit(d, limit);
-	descriptor_set_attribute(d, attribute);
+	descriptor_set_attribute(d, attribute, privilege);
 }
 
-selector selector_new(dword offset, word attribute)
+selector selector_new(dword offset, dword is_ldt, dword privilege)
 {
-	return (offset & 0xfff8) | (attribute & 0x0007);
+	return (offset & 0xfff8) | is_ldt | privilege;
 }
 
 #endif
