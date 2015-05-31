@@ -239,7 +239,7 @@ gdt.kernel.memory	descriptor	0, 0fffffh,	\
 	descriptor.data32 | descriptor.data.readwrite |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
-gdt.kernel.code		descriptor	kernel.code.physic_address, 0fffffh,	\
+gdt.kernel.code		descriptor	0, 0fffffh,	\
 	descriptor.code32 | descriptor.code.readable |\
 	descriptor.gran.4kb | descriptor.present,\
 	privilege.kernel
@@ -252,7 +252,7 @@ gdt.length	equ	gdt.end - gdt.base
 
 loader.physic_address equ loader.base * 10h
 kernel.physic_address equ kernel.base * 10h
-kernel.code.physic_address equ kernel.code.base * 10h
+kernel.code.physic_address equ kernel.code.base * 10h + kernel.code.offset
 
 selector.kernel.file	equ	(gdt.kernel.file - gdt.base)|\
 	selector.global | privilege.kernel
@@ -441,7 +441,7 @@ loaderCode32:
 	mov es, ax
 	mov fs, ax
 	mov ss, ax
-	jmp selector.kernel.code : kernel.code.offset
+	jmp selector.kernel.code : kernel.code.physic_address
 
 abcdefg db "ABCDEFG"
 length equ $ - abcdefg
