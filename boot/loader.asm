@@ -278,9 +278,11 @@ selector.putchar32	equ	(gdt.putchar32 - gdt.base)|\
 ; * @Description: Now inside 32 bit protected mode of loader, addressing
 ; * uses 32bit virtual address and descriptors.
 ;***********************************************************************
+bits 32
 align 32
 loaderCode32:
-	mov ax, selector.flat_data
+	xor eax, eax
+	mov eax, selector.flat_data
 	mov ds, ax
 	mov es, ax
 	mov fs, ax

@@ -82,9 +82,8 @@ descriptor.available		equ	1000h
 	dw	%2 & 0ffffh		;b0~b1: limit[0:15]
 	dw	%1 & 0ffffh		;b2~b3: base[0:15]
 	db	(%1 >> 16) & 0ffh	;b4: base[16:23]
-	db	(%3 & 0ffh) | ((%4 & 03h) << 5)
+	dw	(%3 & 0f0ffh) | ((%4 & 03h) << 5) | (((%2 >> 16) & 0fh) << 8)
 			;b5: privilege << 5 | attribute[0:7]
-	db	((%3 >> 8) & 0f0h) | ((%2 >> 16) & 0fh)
 			;b6: attribute[12:15] << 4 | limit[16:19]
 	db	(%1>>24) & 0ffh		;b7: base[24:31]
 %endmacro
