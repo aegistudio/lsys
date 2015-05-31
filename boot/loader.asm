@@ -338,7 +338,13 @@ loaderCode32:
 	cmp ebx, eax
 	jge loader.program_header.interprete.end
 
+	mov eax, ebx
 	mov ebx, dword[es : (elf.program_header.offset - elf.header.base)]
+	mov ecx, dword[es : (elf.program_header.entry.size - elf.header.base)]
+	and ecx, 0000ffffh
+	mul ecx
+	add ebx, eax
+	and ebx, 0000ffffh
 	mov eax, dword[es : bx]
 
 	cmp eax, elf.program_header.type.load
@@ -363,7 +369,7 @@ loaderCode32:
 		mov eax, dword[ds : elf.program_header.memory_size]
 		cmp ebx, eax
 		jge loader.program_header.clean_memory.end
-		mov dword[fs : bx], 0
+		mov dword[fs : ebx], 0
 		add ebx, 4
 		jmp loader.program_header.clean_memory
 		loader.program_header.clean_memory.end:
@@ -428,6 +434,12 @@ loaderCode32:
 	mov ebx, progress.length
 	call loader.writeToEnd32
 
+	; Random Access Will Be Required In Kernel, So Setup Random Access
+	mov ax, selector.random_data
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov ss, ax
 	jmp selector.kernel.code : kernel.code.offset
 
 abcdefg db "ABCDEFG"
