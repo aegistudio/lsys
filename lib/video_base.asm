@@ -1,9 +1,3 @@
-global video_line_counter
-global video_column_counter
-
-section .bss
-video_line_counter		resd	1
-video_column_counter		resd	1
 video_line_length		equ	80
 video_line_count		equ	50
 

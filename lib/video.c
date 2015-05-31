@@ -6,8 +6,8 @@
 extern void asm_video_brush_screen(dword and, dword or, dword begin_index, dword end_index);
 extern void asm_video_put_char(dword index, dword sequence);
 
-extern dword video_line_counter;
-extern dword video_column_counter;
+__private dword video_line_counter;
+__private dword video_column_counter;
 
 __constant(video_table_size,	4);
 
@@ -56,4 +56,13 @@ void video_put_string(byte* string, byte color)
 	}
 }
 
+void video_line_move		(dword offset)
+{
+	video_set_cursor(video_line_counter + 1, video_column_counter);
+}
+
+void video_column_move		(dword offset)
+{
+	video_set_cursor(video_line_counter, video_column_counter + 1);
+}
 #endif
