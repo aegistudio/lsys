@@ -31,19 +31,28 @@ void keyboard_event(word scancode, dword is_down)
 		if(pointer <= 0) return;
 		pointer --;
 		input_buffer[pointer] = 0;
+		return;
 	}
-	if(scancode >= keyboard_f1 && scancode >= keyboard_f5)
+	if(scancode >= keyboard_f1 && scancode <= keyboard_f5)
 	{
-
+		if(!is_down) return;
+		color_now = scancode - keyboard_f1 + 0x07;
+		return;
 	}
-	//if(is_down) video_put_char('#', 0x7f);
-	//else video_put_char('*', 0x7f);
 }
 
 void input_event(byte ascii)
 {
-	input_buffer[pointer] = ascii;
-	pointer ++;
+	if((keyboard_keystate(keyboard_lshift) | keyboard_keystate(keyboard_lshift)) \
+	 & keyboard_keystate(keyboard_tab))
+	{
+		//do nothing
+	}
+	else
+	{
+		input_buffer[pointer] = ascii;
+		pointer ++;
+	}
 }
 
 __public void kernel_interrupt_service()

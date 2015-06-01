@@ -110,5 +110,6 @@ typedef void (*keyboard_input_handler)(byte character);
 #endif
 
 __keyboard_h_export void keyboard_initalize(keyboard_event_handler event, keyboard_input_handler input);
+__keyboard_h_export byte keyboard_keystate(word scancode);
 
 #endif

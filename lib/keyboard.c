@@ -5,6 +5,10 @@
 #include "interrupt.h"
 
 __private byte keyboard_scancode_state[0xff];
+
+__private byte keyboard_e0_scancode_state[0xff];
+__private byte keyboard_e1_scancode_state[0xff];
+
 __private byte keyboard_scancode_ascii[0xff];
 __private byte keyboard_ascii_major[0xff];
 
@@ -31,6 +35,8 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 	 	keyboard_scancode_ascii[i] = 0;
 		keyboard_ascii_major[i] = 0;
 		keyboard_scancode_state[i] = 0;
+		keyboard_e0_scancode_state[i] = 0;
+		keyboard_e1_scancode_state[i] = 0;
 	}
 
 	__keyboard_registry(keyboard_space, ' ', ' ');
@@ -111,10 +117,16 @@ __public void keyboard_processor(byte input)
 			input = input - 0x80;
 		}
 
-		if(keyboard_scancode_state[input] != is_down)
+		byte* query_pointer = &keyboard_scancode_state[input];
+		if(extension == keyboard_extension0)
+			query_pointer = &keyboard_e0_scancode_state[input];
+		else if(extension == keyboard_extension1)
+			query_pointer = &keyboard_e1_scancode_state[input];
+
+		if(*query_pointer != is_down)
 		{
 			state_changes = 1;
-			keyboard_scancode_state[input] = is_down;
+			*query_pointer = is_down;
 		}
 		
 
@@ -154,4 +166,13 @@ __public void keyboard_processor(byte input)
 	interrupt_controller_end(interrupt_ir1_keyboard);
 }
 
+byte keyboard_keystate(word scancode)
+{
+	byte* query_pointer = &keyboard_scancode_state[scancode & 0x007f];
+	if((scancode >> 8) & 0x00ff == keyboard_extension0)
+		query_pointer = &keyboard_e0_scancode_state[scancode & 0x007f];
+	else if((scancode >> 8) & 0x00ff == keyboard_extension1)
+		query_pointer = &keyboard_e1_scancode_state[scancode & 0x007f];
+	return *query_pointer;
+}
 #endif
