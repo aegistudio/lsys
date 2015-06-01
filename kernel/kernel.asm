@@ -1,6 +1,7 @@
 global kernel_main
 extern kernel_gdt_migration
 extern kernel_video_setup
+extern kernel_interrupt_setup
 
 section .bss
 kernel.stack		resd	1024 * 2
@@ -24,5 +25,8 @@ kernel_main:
 
 	; Setup Kernel Screen Environment
 	call kernel_video_setup
+
+	; Setup Interrupt Controllers And IDT.
+	;call kernel_interrupt_setup
 
 	jmp $

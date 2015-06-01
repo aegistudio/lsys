@@ -26,13 +26,16 @@ lib.code:
 	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
 	@nasm lib/video_base.asm -o bin/lib/video_base.obj -f elf32
 	@gcc -c lib/video.c -I include/	-o bin/lib/video.obj
+	@nasm lib/interrupt_base.asm -o bin/lib/interrupt_base.obj -f elf32
+	@gcc -c lib/interrupt.c -I include/ -o bin/lib/interrupt.obj
 
 kernel.code: lib.code
 	@echo "Compiling The Code Of Kernel..."
 	@nasm kernel/kernel.asm -o bin/kernel/kernel.obj -f elf32
-	@gcc -c kernel/protect.c -I include -o bin/kernel/protect.obj
-	@gcc -c kernel/video.c -I include -o bin/kernel/video.obj
-	@ld bin/kernel/*.obj bin/lib/*.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
+	@gcc -c kernel/protect.c -I include/ -o bin/kernel/protect.obj
+	@gcc -c kernel/video.c -I include/ -o bin/kernel/video.obj
+	@gcc -c kernel/interrupt.c -I include/ -o bin/kernel/interrupt.obj
+	@ld bin/kernel/*.obj bin/lib/*.obj -o bin/kernel/kernel.elf -x --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."

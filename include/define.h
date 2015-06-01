@@ -16,6 +16,6 @@ typedef unsigned long long qword;
 
 #define __public
 #define __private static
-#define __constant(key, value) __private const dword key = value;
+#define __constant(key, value) __private dword key = value;
 
 #endif

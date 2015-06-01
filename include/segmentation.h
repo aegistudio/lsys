@@ -1,9 +1,9 @@
 /********************************************************************
  *			segmentation_h
  * @Title: segmentation c-language include file
- * @Author: LuoHa_ran
+ * @Author: LuoHaoran
  * @Description: This file declares structures and operation which
- * is related to segmentation in protected mode of cpu_
+ * is related to segmentation in protected mode of cpu.
 ********************************************************************/
 
 #include "define.h"
