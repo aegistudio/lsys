@@ -20,19 +20,19 @@
 #pragma pack(push)
 #pragma pack(1)
 
-__constant(privilege_system			,	0x00);
-__constant(privilege_kernel			,	0x00);
-__constant(privilege_root_service		,	0x01);
-__constant(privilege_service			,	0x02);
-__constant(privilege_user			,	0x03);
-__constant(privilege_application		,	0x03);
+#define privilege_system				0x00
+#define privilege_kernel				0x00
+#define privilege_root_service				0x01
+#define privilege_service				0x02
+#define privilege_user					0x03
+#define privilege_application				0x03
 
 typedef word selector;
 
 __segmentation_h_func__ selector selector_new(dword offset, dword is_ldt, dword privilege);
 
-__constant(selector_local			,	0x04);
-__constant(selector_global			,	0x00);
+#define selector_local					0x04
+#define selector_global					0x00
 
 typedef struct __dt_pointer_t
 {
@@ -59,31 +59,31 @@ __segmentation_h_func__ dword descriptor_get_attribute(descriptor *d);
 __segmentation_h_func__ void descriptor_set_attribute(descriptor *d, dword attribute, dword privilege);
 __segmentation_h_func__ void descriptor_new(descriptor *d, dword base, dword limit, dword attribute, dword privilege);
 
-__constant(descriptor_data32			,	0x4010);
-__constant(descriptor_data16			,	0x0010);
-__constant(descriptor_expdown4gb		,	0x4014);
-__constant(descriptor_expdown64k		,	0x0014);
-__constant(descriptor_code32			,	0x4018);
-__constant(descriptor_code16			,	0x0018);
-__constant(descriptor_system			,	0x0000);
+#define descriptor_data32				0x4010
+#define descriptor_data16				0x0010
+#define descriptor_expdown4gb				0x4014
+#define descriptor_expdown64k				0x0014
+#define descriptor_code32				0x4018
+#define descriptor_code16				0x0018
+#define descriptor_system				0x0000
 
-__constant(descriptor_accessed			,	0x01);
+#define descriptor_accessed				0x01
 
-__constant(descriptor_data_readonly		,	0x00);
-__constant(descriptor_data_readwrite		,	0x02);
+#define descriptor_data_readonly			0x00
+#define descriptor_data_readwrite			0x02
 
-__constant(descriptor_code_noread		,	0x00);
-__constant(descriptor_code_readable		,	0x02);
-__constant(descriptor_code_conform		,	0x04);
+#define descriptor_code_noread				0x00
+#define descriptor_code_readable			0x02
+#define descriptor_code_conform				0x04
 
-__constant(descriptor_missing			,	0x00);
-__constant(descriptor_present			,	0x80);
+#define descriptor_missing				0x00
+#define descriptor_present				0x80
 
-__constant(descriptor_gran_byte			,	0x0000);
-__constant(descriptor_gran_4kb			,	0x8000);
+#define descriptor_gran_byte				0x0000
+#define descriptor_gran_4kb				0x8000
 
-__constant(descriptor_none			,	0x0000);
-__constant(descriptor_available			,	0x1000);
+#define descriptor_none					0x0000
+#define descriptor_available				0x1000
 
 typedef struct __gate_t
 {
@@ -105,17 +105,17 @@ __segmentation_h_func__ dword gate_get_attribute(gate* g);
 __segmentation_h_func__ void gate_set_attribute(gate* g, dword attribute, dword privilege);
 __segmentation_h_func__ void gate_new(gate* g, dword offset, selector base, dword attribute, dword privilege);
 
-__constant(descriptor_system_286		,	0x00);
-__constant(descriptor_system_386		,	0x08);
+#define descriptor_system_286				0x00
+#define descriptor_system_386				0x08
 
-__constant(descriptor_tss			,	0x01);
-__constant(descriptor_system_busy		,	0x02);
-__constant(descriptor_system_idle		,	0x00);
+#define descriptor_tss					0x01
+#define descriptor_system_busy				0x02
+#define descriptor_system_idle				0x00
 
-__constant(descriptor_ldt			,	0x02);
-__constant(descriptor_gate_call			,	0x04);
-__constant(descriptor_gate_interrupt		,	0x06);
-__constant(descriptor_gate_trap			,	0x07);
+#define descriptor_ldt					0x02
+#define descriptor_gate_call				0x04
+#define descriptor_gate_interrupt			0x06
+#define descriptor_gate_trap				0x07
 
 #pragma pack(pop)
 

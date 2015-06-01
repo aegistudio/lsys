@@ -9,7 +9,7 @@ extern void asm_video_put_char(dword index, dword sequence);
 __private dword video_line_counter;
 __private dword video_column_counter;
 
-__constant(video_table_size,	4);
+#define video_table_size	4
 
 void video_clear_screen()
 {

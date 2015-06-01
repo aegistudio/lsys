@@ -6,8 +6,8 @@
 extern void asm_interrupt_outb(word port, byte word);
 extern byte asm_interrupt_inb(word port);
 
-__private byte interrupt_master_8295a_ocw = 0xff;
-__private byte interrupt_slave_8295a_ocw = 0xff;
+__private byte interrupt_master_8295a_ocw;
+__private byte interrupt_slave_8295a_ocw;
 
 __public void interrupt_controller_initialize()
 {
@@ -34,6 +34,9 @@ __public void interrupt_controller_initialize()
 		| icw_mode_fully_nested_normal;
 	asm_interrupt_outb(interrupt_master_8295a + 1, mode);
 	asm_interrupt_outb(interrupt_slave_8295a + 1, mode);
+
+	interrupt_master_8295a_ocw = 0xff;
+	interrupt_slave_8295a_ocw = 0xff;
 
 	asm_interrupt_outb(interrupt_master_8295a + 1, interrupt_master_8295a_ocw);
 	asm_interrupt_outb(interrupt_slave_8295a + 1, interrupt_slave_8295a_ocw);
@@ -171,6 +174,18 @@ __private void default_exception_handler(dword vector, dword error_code, dword i
 	}
 }
 
+extern void asm_default_interrupt_handler();
+__public void default_interrupt_handler()
+{
+	video_put_string("\n=======default_interrupt_handler==========", 0x07);
+	video_put_string("\nThe corresponding handler was not set, no ", 0x07);
+	video_put_string("\nprocess will be made and I/O data is likely", 0x07);
+	video_put_string("\nto lost.", 0x07);
+	video_put_string("\n==========================================", 0x07);
+	interrupt_controller_end(0x00);
+	interrupt_controller_end(0x08);
+}
+
 #define __interrupt_gate_setup(index, tag) gate_new(&idt[index], tag, cs, \
 		descriptor_gate_interrupt | descriptor_system_386 | descriptor_present, \
 		privilege_kernel);
@@ -201,6 +216,8 @@ __public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)
 	 __interrupt_gate_setup(17, exception_tag_17_alignment_check);
 	 __interrupt_gate_setup(18, exception_tag_18_machine_check);
 	 __interrupt_gate_setup(19, exception_tag_19_simd_exception);
+
+	//for(i = 0x20; i <= 0x2f; i ++) __interrupt_gate_setup(i, asm_default_interrupt_handler);
 }
 #undef __interrupt_gate_setup
 

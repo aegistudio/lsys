@@ -9,11 +9,11 @@
 	#define __video_h_export extern
 #endif
 
-__constant(video_line_length	,	80);
-__constant(video_line_count	,	50);
-__constant(video_alignment_left	,	0);
-__constant(video_alignment_mid	,	1);
-__constant(video_alignment_right,	2);
+#define video_line_length		80
+#define video_line_count		50
+#define video_alignment_left		0
+#define video_alignment_mid		1
+#define video_alignment_right		2
 
 __video_h_export void video_set_cursor		(dword line, dword column);
 __video_h_export void video_clear_screen	();

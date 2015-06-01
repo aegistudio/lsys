@@ -119,3 +119,9 @@ exception_tag_bus:
 	call exception_handler_bus
 	add esp, 4 * 2
 	iretd
+
+global asm_default_interrupt_handler
+extern default_interrupt_handler
+asm_default_interrupt_handler:
+	call default_interrupt_handler
+	iretd

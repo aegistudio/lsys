@@ -27,4 +27,6 @@ kernel_main:
 	call kernel_interrupt_setup
 	lidt [eax]
 
-	jmp $
+	sti
+
+	hlt
