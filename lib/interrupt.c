@@ -6,9 +6,6 @@
 extern void asm_interrupt_outb(word port, byte word);
 extern byte asm_interrupt_inb(word port);
 
-__private byte interrupt_master_8295a_ocw;
-__private byte interrupt_slave_8295a_ocw;
-
 __public void interrupt_controller_initialize()
 {
 	byte* byte_pointer;
@@ -35,11 +32,8 @@ __public void interrupt_controller_initialize()
 	asm_interrupt_outb(interrupt_master_8295a + 1, mode);
 	asm_interrupt_outb(interrupt_slave_8295a + 1, mode);
 
-	interrupt_master_8295a_ocw = 0xff;
-	interrupt_slave_8295a_ocw = 0xff;
-
-	asm_interrupt_outb(interrupt_master_8295a + 1, interrupt_master_8295a_ocw);
-	asm_interrupt_outb(interrupt_slave_8295a + 1, interrupt_slave_8295a_ocw);
+	asm_interrupt_outb(interrupt_master_8295a + 1, 0xff);
+	asm_interrupt_outb(interrupt_slave_8295a + 1, 0xff);
 }
 
 __public void interrupt_controller_set(byte mask, byte enabled)
@@ -47,15 +41,17 @@ __public void interrupt_controller_set(byte mask, byte enabled)
 	if(mask < 0x08)
 	{
 		byte maskword = 1 << mask;
-		interrupt_master_8295a_ocw &= (0xff ^ maskword);
-		if(enabled) interrupt_master_8295a_ocw |= maskword;
+		byte interrupt_master_8295a_ocw = asm_interrupt_inb(interrupt_master_8295a + 1);
+		if(enabled) interrupt_master_8295a_ocw &= (0xff ^ maskword);
+		else interrupt_master_8295a_ocw |= maskword;
 		asm_interrupt_outb(interrupt_master_8295a + 1, interrupt_master_8295a_ocw);
 	}
 	else
 	{
 		byte maskword = 1 << (mask - 0x08);
-		interrupt_slave_8295a_ocw &= (0xff ^ maskword);
-		if(enabled) interrupt_slave_8295a_ocw |= maskword;
+		byte interrupt_slave_8295a_ocw = asm_interrupt_inb(interrupt_slave_8295a + 1);
+		if(enabled) interrupt_slave_8295a_ocw &= (0xff ^ maskword);
+		else interrupt_slave_8295a_ocw |= maskword;
 		asm_interrupt_outb(interrupt_slave_8295a + 1, interrupt_slave_8295a_ocw);
 	}
 }

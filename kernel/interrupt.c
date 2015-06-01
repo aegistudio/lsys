@@ -11,5 +11,6 @@ dt_pointer* kernel_interrupt_setup(selector* cs)
 	idt_pointer.base = idt;
 	idt_pointer.limit = sizeof(idt) - 1;
 	interrupt_idt_set_pointer(&idt_pointer, cs);
+	interrupt_controller_set(interrupt_ir1_keyboard, 1);
 	return &idt_pointer;
 }
