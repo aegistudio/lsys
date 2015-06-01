@@ -11,6 +11,16 @@ __private dword video_column_counter;
 
 #define video_table_size	4
 
+dword video_get_line()
+{
+	return video_line_counter;
+}
+
+dword video_get_column()
+{
+	return video_column_counter;
+}
+
 void video_clear_screen()
 {
 	video_line_counter = 0;
