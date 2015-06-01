@@ -1,6 +1,8 @@
 #ifndef __keyboard_h__
 #define __keyboard_h__
 
+#include "define.h"
+
 #define keyboard_escape		0x01
 #define keyboard_space		0x39
 #define keyboard_enter		0x1c
