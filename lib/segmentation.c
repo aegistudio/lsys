@@ -107,4 +107,11 @@ void gate_set_attribute(gate* g, dword attribute, dword privilege)
 	g->attribute = attribute & 0x9f | ((privilege & 0x03) << 5);
 }
 
+void gate_new(gate* g, dword offset, selector base, dword attribute, dword privilege)
+{
+	gate_set_offset(g, offset);
+	gate_set_base(g, base);
+	gate_set_attribute(g, attribute, privilege);
+}
+
 #endif

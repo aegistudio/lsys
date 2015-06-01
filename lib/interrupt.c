@@ -64,4 +64,73 @@ __public void interrupt_controller_end(byte mask)
 	else asm_interrupt_outb(interrupt_slave_8295a, 0x20);
 }
 
+__private gate* idt;
+__private exception_handler exception_handlers[20];
+
+extern void exception_tag_0_division_error();
+extern void exception_tag_1_debug();
+extern void exception_tag_2_nmi();
+extern void exception_tag_3_breakpoint();
+extern void exception_tag_4_overflow();
+extern void exception_tag_5_bounds_check();
+extern void exception_tag_6_invalid_opcode();
+extern void exception_tag_7_coprocessor_unavailable();
+extern void exception_tag_8_double_fault();
+extern void exception_tag_9_coprocessor_exceed();
+extern void exception_tag_10_invalid_tss();
+extern void exception_tag_11_not_present();
+extern void exception_tag_12_stack_fault();
+extern void exception_tag_13_general_protection();
+extern void exception_tag_14_page_fault();
+extern void exception_tag_15_reserved();
+extern void exception_tag_16_fpu_fault();
+extern void exception_tag_17_alignment_check();
+extern void exception_tag_18_machine_check();
+extern void exception_tag_19_simd_exception();
+
+__public void exception_handler_bus(dword vector, dword error_code, dword ip, selector cs, dword eflag)
+{
+	exception_handler handler = exception_handlers[vector];
+	handler(vector, error_code, ip, cs, eflag);
+}
+
+#include "video.h"
+__private void default_exception_handler(dword vector, dword error_code, dword ip, selector cs, dword eflag)
+{
+	video_put_string("##Unhandled Exception Occurs!##", 0x07);
+}
+
+#define __interrupt_gate_setup(index, tag) gate_new(&idt[index],tag, cs, \
+		descriptor_gate_interrupt | descriptor_system_386 | descriptor_present, \
+		privilege_kernel);
+__public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)
+{
+	idt = (gate*)(pointer->base);
+	int i = 0;
+	for(; i < 20; i ++)
+		exception_handlers[i] = (exception_handler*)default_exception_handler;
+
+	 __interrupt_gate_setup(0, exception_tag_0_division_error);
+	 __interrupt_gate_setup(1, exception_tag_1_debug);
+	 __interrupt_gate_setup(2, exception_tag_2_nmi);
+	 __interrupt_gate_setup(3, exception_tag_3_breakpoint);
+	 __interrupt_gate_setup(4, exception_tag_4_overflow);
+	 __interrupt_gate_setup(5, exception_tag_5_bounds_check);
+	 __interrupt_gate_setup(6, exception_tag_6_invalid_opcode);
+	 __interrupt_gate_setup(7, exception_tag_7_coprocessor_unavailable);
+	 __interrupt_gate_setup(8, exception_tag_8_double_fault);
+	 __interrupt_gate_setup(9, exception_tag_9_coprocessor_exceed);
+	 __interrupt_gate_setup(10, exception_tag_10_invalid_tss);
+	 __interrupt_gate_setup(11, exception_tag_11_not_present);
+	 __interrupt_gate_setup(12, exception_tag_12_stack_fault);
+	 __interrupt_gate_setup(13, exception_tag_13_general_protection);
+	 __interrupt_gate_setup(14, exception_tag_14_page_fault);
+	 __interrupt_gate_setup(15, exception_tag_15_reserved);
+	 __interrupt_gate_setup(16, exception_tag_16_fpu_fault);
+	 __interrupt_gate_setup(17, exception_tag_17_alignment_check);
+	 __interrupt_gate_setup(18, exception_tag_18_machine_check);
+	 __interrupt_gate_setup(19, exception_tag_19_simd_exception);
+}
+#undef __interrupt_gate_setup
+
 #endif

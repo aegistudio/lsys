@@ -2,6 +2,7 @@
 #define __interrupt_h__
 
 #include "define.h"
+#include "segmentation.h"
 
 #ifdef __interrupt_c__
 	#define __interrupt_h_export __public
@@ -64,6 +65,10 @@ __constant(icw_mode_fully_nested_normal,	0x00);
 __interrupt_h_export void interrupt_controller_initialize();
 __interrupt_h_export void interrupt_controller_set(byte mask, byte enabled);
 __interrupt_h_export void interrupt_controller_end(byte mask);
+
+typedef void (*exception_handler)(dword vector, dword error_code, dword ip, selector cs, dword eflag);
+typedef void (*interrupt_handler)(dword interrupt);
+__interrupt_h_export void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs);
 
 __constant(interrupt_ir0_clock,		0x00);
 __constant(interrupt_ir1_keyboard,	0x01);

@@ -103,6 +103,7 @@ __segmentation_h_func__ byte gate_get_parameter_count(gate* g);
 __segmentation_h_func__ void gate_set_parameter_count(gate* g, byte count);
 __segmentation_h_func__ dword gate_get_attribute(gate* g);
 __segmentation_h_func__ void gate_set_attribute(gate* g, dword attribute, dword privilege);
+__segmentation_h_func__ void gate_new(gate* g, dword offset, selector base, dword attribute, dword privilege);
 
 __constant(descriptor_system_286		,	0x00);
 __constant(descriptor_system_386		,	0x08);
