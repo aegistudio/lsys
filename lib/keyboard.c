@@ -3,6 +3,7 @@
 
 #include "keyboard.h"
 
+__private byte keyboard_scancode_state[0xff];
 __private byte keyboard_scancode_ascii[0xff];
 __private byte keyboard_ascii_major[0xff];
 
@@ -10,16 +11,24 @@ __private byte keyboard_ascii_major[0xff];
 	keyboard_scancode_ascii[scancode] = index;	\
 	keyboard_ascii_major[index] = major;
 
+__private byte extension;
 __private byte caps_lock;
 __private byte shift;
 
+keyboard_event_handler event_handler;
+keyboard_input_handler input_handler;
+
 __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_handler input)
 {
+	event_handler = event;
+	input_handler = input;
+
 	int i = 0;
 	for(; i < 0xff; i ++)
 	{
 	 	keyboard_scancode_ascii[i] = 0;
 		keyboard_ascii_major[i] = 0;
+		keyboard_scancode_state[i] = 0;
 	}
 
 	__keyboard_registry(keyboard_space, ' ', ' ');
@@ -73,6 +82,68 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 	__keyboard_registry(keyboard_apostrophe, '\'', '\"');
 	__keyboard_registry(keyboard_minus, '-', '_');
 	__keyboard_registry(keyboard_equal, '=', '+');
+
+	extension = 0;
+	caps_lock = 0;
+	shift = 0;
+}
+
+__public void keyboard_processor(byte input)
+{
+	if(input == keyboard_extension0 || input == keyboard_extension1)
+	{
+		extension = input;
+		return;
+	}
+	else
+	{
+		byte is_down = 1;
+		byte state_changes = 0;
+		if(input >= 0x80)
+		{
+			is_down = 0;
+			input = input - 0x80;
+		}
+
+		if(keyboard_scancode_state[input] != is_down)
+		{
+			state_changes = 1;
+			keyboard_scancode_state[input] = is_down;
+		}
+		
+
+		if(extension)
+		{
+			if(state_changes)
+				event_handler(extension << 4 | input, is_down);
+			return;
+		}
+		else
+		{
+			if(state_changes)
+				event_handler(input, is_down);
+
+			if(is_down)
+			{
+				byte ascii = keyboard_scancode_ascii[input];
+				shift = keyboard_scancode_state[keyboard_lshift]
+					| keyboard_scancode_state[keyboard_rshift];
+				caps_lock = !caps_lock;
+				if(ascii != 0)
+				{
+					if(caps_lock & !shift)
+					{
+						if(ascii >= 'a' && ascii <= 'z')
+							input_handler(keyboard_ascii_major[ascii]);
+						else input_handler(ascii);
+					}
+					
+					if(shift) input_handler(keyboard_ascii_major[ascii]);
+					else input_handler(ascii);
+				}
+			}
+		}
+	}
 }
 
 #endif
