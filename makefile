@@ -28,6 +28,7 @@ lib.code:
 	@gcc -c lib/video.c -I include/	-o bin/lib/video.obj
 	@nasm lib/interrupt_base.asm -o bin/lib/interrupt_base.obj -f elf32
 	@gcc -c lib/interrupt.c -I include/ -o bin/lib/interrupt.obj -w
+	@nasm lib/keyboard_base.asm -o bin/lib/keyboard_base.obj -f elf32
 	@gcc -c lib/keyboard.c -I include -o bin/lib/keyboard.obj
 
 kernel.code: lib.code

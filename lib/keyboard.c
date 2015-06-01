@@ -2,6 +2,7 @@
 #define __keyboard_c__
 
 #include "keyboard.h"
+#include "interrupt.h"
 
 __private byte keyboard_scancode_state[0xff];
 __private byte keyboard_scancode_ascii[0xff];
@@ -18,6 +19,7 @@ __private byte shift;
 keyboard_event_handler event_handler;
 keyboard_input_handler input_handler;
 
+extern void asm_keyboard_service();
 __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_handler input)
 {
 	event_handler = event;
@@ -86,6 +88,9 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 	extension = 0;
 	caps_lock = 0;
 	shift = 0;
+
+	interrupt_controller_set(interrupt_ir1_keyboard, 1);
+	interrupt_set_interrupt_handler(interrupt_vector_base + interrupt_ir1_keyboard, asm_keyboard_service);
 }
 
 __public void keyboard_processor(byte input)
@@ -93,7 +98,6 @@ __public void keyboard_processor(byte input)
 	if(input == keyboard_extension0 || input == keyboard_extension1)
 	{
 		extension = input;
-		return;
 	}
 	else
 	{
@@ -116,7 +120,6 @@ __public void keyboard_processor(byte input)
 		{
 			if(state_changes)
 				event_handler(extension << 4 | input, is_down);
-			return;
 		}
 		else
 		{
@@ -144,6 +147,7 @@ __public void keyboard_processor(byte input)
 			}
 		}
 	}
+	interrupt_controller_end(interrupt_ir1_keyboard);
 }
 
 #endif
