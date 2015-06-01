@@ -95,12 +95,83 @@ __public void exception_handler_bus(dword vector, dword error_code, dword ip, se
 }
 
 #include "video.h"
-__private void default_exception_handler(dword vector, dword error_code, dword ip, selector cs, dword eflag)
+const byte* exception_error_messages_0 = "#0: division_error";
+const byte* exception_error_messages_1 = "#1: debug";
+const byte* exception_error_messages_2 = "#2: nmi";
+const byte* exception_error_messages_3 = "#3: breakpoint";
+const byte* exception_error_messages_4 = "#4: overflow";
+const byte* exception_error_messages_5 = "#5: bounds_check";
+const byte* exception_error_messages_6 = "#6: invalid_opcode";
+const byte* exception_error_messages_7 = "#7: coprocessor_unavailable";
+const byte* exception_error_messages_8 = "#8: double_fault";
+const byte* exception_error_messages_9 = "#9: coprocessor_exceed";
+const byte* exception_error_messages_10 = "#10: invalid_tss";
+const byte* exception_error_messages_11 = "#11: not_present";
+const byte* exception_error_messages_12 = "#12: stack_fault";
+const byte* exception_error_messages_13 = "#13: general_protection";
+const byte* exception_error_messages_14 = "#14: page_fault";
+const byte* exception_error_messages_15 = "#15: reserved";
+const byte* exception_error_messages_16 = "#16: fpu_fault";
+const byte* exception_error_messages_17 = "#17: alignment_check";
+const byte* exception_error_messages_18 = "#18: machine_check";
+const byte* exception_error_messages_19 = "#19: simd_exception";
+
+char print_hex_string[16];
+
+__private byte* convert_hex(dword hex, int bits)
 {
-	video_put_string("##Unhandled Exception Occurs!##", 0x07);
+	byte* pointer = print_hex_string + sizeof(print_hex_string) - 1;
+	*pointer = 0;
+
+	int i = 0;
+	for(; i < bits; i ++)
+	{
+		pointer --;
+		*pointer = (hex & 0x0000000f);
+		if(*pointer < 10) *pointer += '0';
+		else *pointer += 'a';
+		hex = hex >> 4;
+	}
+	return pointer;
 }
 
-#define __interrupt_gate_setup(index, tag) gate_new(&idt[index],tag, cs, \
+__private void default_exception_handler(dword vector, dword error_code, dword ip, selector cs, dword eflag)
+{
+	if(vector < 20)
+	{
+		video_put_string("\n======default_exception_handler=========", 0x07);
+
+		video_put_string("\nexception_id: ", 0x07);
+		video_put_char(vector / 10 + '0', 0x07);
+		video_put_char(vector % 10 + '0', 0x07);
+		video_put_string(" (hex: 0x", 0x07);
+		video_put_string(convert_hex(vector, 2), 0x07);
+		video_put_string(")", 0x07);
+
+		video_put_string("\nip: 0x", 0x07);
+		video_put_string(convert_hex(ip, 8), 0x07);
+
+		video_put_string("\ncs: 0x", 0x07);
+		video_put_string(convert_hex(cs & 0xfff8, 4), 0x07);
+		video_put_string(" (privilege: ", 0x07);
+		video_put_string(convert_hex(cs & 0x0003, 1), 0x07);
+		video_put_string(")", 0x07);
+
+		video_put_string("\neflag: ", 0x07);
+		video_put_string(convert_hex(eflag, 8), 0x07);
+
+		if(error_code != 0xffffffff)
+		{
+			video_put_string("\nerror_code: ", 0x07);
+			video_put_string(convert_hex(error_code, 8), 0x07);
+		}
+		else video_put_string("\nno error code.", 0x07);
+
+		video_put_string("\n========================================", 0x07);
+	}
+}
+
+#define __interrupt_gate_setup(index, tag) gate_new(&idt[index], tag, cs, \
 		descriptor_gate_interrupt | descriptor_system_386 | descriptor_present, \
 		privilege_kernel);
 __public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)

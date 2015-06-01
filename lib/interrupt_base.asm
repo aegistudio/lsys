@@ -75,6 +75,7 @@ exception_tag_7_coprocessor_unavailable:
 	push 7
 	jmp exception_tag_bus
 exception_tag_8_double_fault:
+	push 0
 	push 8
 	jmp exception_tag_bus
 exception_tag_9_coprocessor_exceed:
@@ -116,5 +117,5 @@ exception_tag_19_simd_exception:
 	jmp exception_tag_bus
 exception_tag_bus:
 	call exception_handler_bus
-	add esp, 8
+	add esp, 4 * 2
 	iretd

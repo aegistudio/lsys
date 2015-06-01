@@ -27,7 +27,7 @@ lib.code:
 	@nasm lib/video_base.asm -o bin/lib/video_base.obj -f elf32
 	@gcc -c lib/video.c -I include/	-o bin/lib/video.obj
 	@nasm lib/interrupt_base.asm -o bin/lib/interrupt_base.obj -f elf32
-	@gcc -c lib/interrupt.c -I include/ -o bin/lib/interrupt.obj
+	@gcc -c lib/interrupt.c -I include/ -o bin/lib/interrupt.obj -w
 
 kernel.code: lib.code
 	@echo "Compiling The Code Of Kernel..."
