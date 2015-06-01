@@ -325,6 +325,10 @@ loaderCode32:
 	cmp eax, ebx
 	jne loader.kernel_relocate.fail
 
+	; Reset Entry Of Kernel
+	mov eax, dword[es : (elf.entry - elf.header.base)]
+	mov dword[ds : (loader.kernel_jump_far + 1)], eax
+
 	; Interprete Program Header
 	mov eax, dword[es : (elf.program_header.offset - elf.header.base)]
 	mov dword[elf.program_header.offset], eax
@@ -441,7 +445,9 @@ loaderCode32:
 	mov es, ax
 	mov fs, ax
 	mov ss, ax
-	jmp selector.kernel.code : kernel.code.physic_address
+
+	loader.kernel_jump_far:	
+	jmp dword selector.kernel.code : 0
 
 abcdefg db "ABCDEFG"
 length equ $ - abcdefg
