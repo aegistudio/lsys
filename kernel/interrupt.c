@@ -22,8 +22,12 @@ __public void kernel_interrupt_service()
 }
 
 #include "video.h"
+byte color_clock = 0;
+
 __public void kernel_interrupt_svc_clock()
 {
-	video_put_char('#', 0x07);
+	video_put_char('#', color_clock & 0x0f);
+	color_clock += color_clock - 1;
 	interrupt_controller_end(interrupt_ir0_clock);
 }
+

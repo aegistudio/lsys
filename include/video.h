@@ -10,7 +10,7 @@
 #endif
 
 #define video_line_length		80
-#define video_line_count		50
+#define video_line_count		25
 #define video_alignment_left		0
 #define video_alignment_mid		1
 #define video_alignment_right		2
