@@ -1,3 +1,4 @@
+
 #ifndef __interrupt_c__
 #define __interrupt_c__
 
@@ -176,7 +177,7 @@ __public void default_interrupt_handler()
 	video_put_string("\n=======default_interrupt_handler==========", 0x07);
 	video_put_string("\nThe corresponding handler was not set, no ", 0x07);
 	video_put_string("\nprocess will be made and I/O data is likely", 0x07);
-	video_put_string("\nto lost.", 0x07);
+	video_put_string("\nto lose.", 0x07);
 	video_put_string("\n==========================================", 0x07);
 	interrupt_controller_end(0x00);
 	interrupt_controller_end(0x08);
@@ -218,6 +219,24 @@ __public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)
 
 	for(i = 0x20; i <= 0x2f; i ++) __interrupt_gate_setup(i, asm_default_interrupt_handler);
 }
+
+__public void interrupt_set_exception_handler(dword vector, exception_handler handler)
+{
+	if(vector < 20 && vector >= 0)
+		exception_handlers[vector] = handler;
+}
+
+__public void interrupt_set_interrupt_handler(dword vector, interrupt_handler handler)
+{
+	if(vector < 0x20) return;
+	int interrupt_gate_type;
+	if(vector <= 0x2f) interrupt_gate_type = descriptor_gate_interrupt;
+	else interrupt_gate_type = descriptor_gate_trap;
+	gate_new(&idt[vector], handler, interrupt_code_selector, \
+		descriptor_gate_trap | descriptor_system_386 | descriptor_present, \
+		privilege_kernel);
+}
+
 #undef __interrupt_gate_setup
 
 #endif
