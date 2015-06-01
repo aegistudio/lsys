@@ -28,55 +28,35 @@ __constant(icw_general_call_int8,		0);
 __constant(icw_general_trigger_level,		1);
 __constant(icw_general_trigger_edge,		0);
 
-typedef struct icw_vector_t
-{
-	byte system : 3;
-	byte vector : 5;
-}
-icw_vector;
+__constant(icw_vector_system_8086,		0);
+typedef byte icw_vector;
 
-typedef struct icw_master_mask_t
-{
-	byte ir0 : 1;
-	byte ir1 : 1;
-	byte ir2 : 1;
-	byte ir3 : 1;
-	byte ir4 : 1;
-	byte ir5 : 1;
-	byte ir6 : 1;
-	byte ir7 : 1;
-}
-icw_master_mask;
+__constant(icw_master_mask_ir0,			0x01);
+__constant(icw_master_mask_ir1,			0x02);
+__constant(icw_master_mask_ir2,			0x04);
+__constant(icw_master_mask_ir3,			0x08);
+__constant(icw_master_mask_ir4,			0x10);
+__constant(icw_master_mask_ir5,			0x20);
+__constant(icw_master_mask_ir6,			0x40);
+__constant(icw_master_mask_ir7,			0x80);
+typedef byte icw_master_mask;
 
-typedef struct icw_slave_mask
-{
-	byte master_ir : 3;
-	byte zeroing : 5;
-}
-icw_slave_mask;
+typedef byte icw_slave_mask;
 
-typedef struct icw_mode_t
-{
-	byte mode : 1;
-	byte eoi : 1;
-	byte buffer : 2;
-	byte fully_nested : 1;
-	byte zeroing : 3;
-}
-icw_mode;
+typedef byte icw_mode;
 
 __constant(icw_mode_mcs8085,		0);
 __constant(icw_mode_8086,		1);
 
 __constant(icw_mode_eoi_normal,		0);
-__constant(icw_mode_eoi_auto,		1);
+__constant(icw_mode_eoi_auto,		2);
 
 __constant(icw_mode_buffer_none,	0);
-__constant(icw_mode_buffer_slave,	2);
-__constant(icw_mode_buffer_master,	3);
+__constant(icw_mode_buffer_slave,	0x08);
+__constant(icw_mode_buffer_master,	0x0c);
 
-__constant(icw_mode_fully_nested_special,	0);
-__constant(icw_mode_fully_nested_normal,	0);
+__constant(icw_mode_fully_nested_special,	0x10);
+__constant(icw_mode_fully_nested_normal,	0x00);
 
 __interrupt_h_export void interrupt_controller_initialize();
 
