@@ -46,7 +46,16 @@ void input_event(byte ascii)
 	if((keyboard_keystate(keyboard_lshift) | keyboard_keystate(keyboard_lshift)) \
 	 & keyboard_keystate(keyboard_tab))
 	{
-		//do nothing
+		if(ascii == '\t') return;
+		if(ascii == 'Q') ascii = 'W';
+		else if(ascii == 'W') ascii = 'E';
+		else if(ascii == 'A') ascii = 'S';
+		else if(ascii == 'S') ascii = 'D';
+		else if(ascii == 'Z') ascii = 'X';
+		else if(ascii == 'X') ascii = 'C';
+
+		input_buffer[pointer] = ascii;
+		pointer ++;
 	}
 	else
 	{

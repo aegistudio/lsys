@@ -150,15 +150,26 @@ __public void keyboard_processor(byte input)
 					caps_lock = !caps_lock;
 				if(ascii != 0)
 				{
-					if(caps_lock & !shift)
+					if(caps_lock)
 					{
-						if(ascii >= 'a' && ascii <= 'z')
-							input_handler(keyboard_ascii_major[ascii]);
+						if(!shift)
+						{
+							if(ascii >= 'a' && ascii <= 'z')
+								input_handler(keyboard_ascii_major[ascii]);
+							else input_handler(ascii);
+						}
+						else
+						{
+							if(ascii >= 'a' && ascii <= 'z')
+								input_handler(ascii);
+							else input_handler(keyboard_ascii_major[ascii]);
+						}
+					}
+					else
+					{
+						if(shift) input_handler(keyboard_ascii_major[ascii]);
 						else input_handler(ascii);
 					}
-					
-					if(shift) input_handler(keyboard_ascii_major[ascii]);
-					else input_handler(ascii);
 				}
 			}
 		}
