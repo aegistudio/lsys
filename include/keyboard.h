@@ -4,6 +4,7 @@
 #include "define.h"
 
 #define keyboard_escape		0x01
+#define keyboard_tab		0x0f
 #define keyboard_space		0x39
 #define keyboard_enter		0x1c
 #define keyboard_backspace	0x0e
@@ -17,7 +18,7 @@
 #define keyboard_d		0x20
 #define keyboard_e		0x12
 #define keyboard_f		0x21
-#define keyboard_g		0x1e
+#define keyboard_g		0x22
 #define keyboard_h		0x23
 #define keyboard_i		0x17
 #define keyboard_j		0x24
@@ -49,15 +50,16 @@
 #define keyboard_8		0x09
 #define keyboard_9		0x0a
 
-#define keyboard_semicolon		0x01
+#define keyboard_semicolon		0x27
 #define keyboard_squarebrack_left	0x1a
 #define keyboard_squarebrack_right	0x1b
 #define keyboard_comma			0x33
 #define keyboard_dot			0x34
 #define keyboard_slash			0x35
 #define keyboard_backslash		0x2b
+#define keyboard_upper_dot		0x29
 #define keyboard_apostrophe		0x28
-#define keyboard_minus			0x29
+#define keyboard_minus			0x0c
 #define keyboard_equal			0x0d
 
 #define keyboard_f1		0x3b

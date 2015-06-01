@@ -2,6 +2,7 @@
 #include "segmentation.h"
 #include "interrupt.h"
 #include "keyboard.h"
+#include "video.h"
 
 dt_pointer idt_pointer;
 gate idt[0x0100];
@@ -18,15 +19,27 @@ __public dt_pointer* kernel_interrupt_setup(selector* cs)
 extern void asm_interrupt_svc_clock();
 extern void asm_interrupt_svc_keyboard();
 
+byte input_buffer[video_line_length * video_line_count];
+dword pointer;
+dword color_now;
+
 void keyboard_event(word scancode, dword is_down)
 {
-	if(is_down) video_put_char('#', 0x7f);
-	else video_put_char('*', 0x7f);
+	if(scancode == keyboard_backspace)
+	{
+		if(!is_down) return;
+		if(pointer <= 0) return;
+		pointer --;
+		input_buffer[pointer] = 0;
+	}
+	//if(is_down) video_put_char('#', 0x7f);
+	//else video_put_char('*', 0x7f);
 }
 
 void input_event(byte ascii)
 {
-	
+	input_buffer[pointer] = ascii;
+	pointer ++;
 }
 
 __public void kernel_interrupt_service()
@@ -37,17 +50,26 @@ __public void kernel_interrupt_service()
 	//interrupt_controller_set(interrupt_ir1_keyboard, 1);
 	//interrupt_set_interrupt_handler(interrupt_vector_base + interrupt_ir1_keyboard, asm_interrupt_svc_keyboard);
 	keyboard_initalize(keyboard_event, input_event);
+	int i = 0;
+	for(;i < sizeof(input_buffer); i ++) input_buffer[i] = 0;
+	pointer = 0;
+	color_now = 0x07;
 }
 
-#include "video.h"
-byte color_clock = 0;
+byte update_counter;
 __public void kernel_interrupt_svc_clock()
 {
-//	video_put_char('#', color_clock);
-	color_clock += 1;
+	if((update_counter & 0x04) != 0)
+	{
+		video_clear_screen();
+		video_put_string(input_buffer, color_now);
+		if((update_counter & 0x08) != 0) video_put_char('_', color_now);
+	}
+	update_counter ++;
 	interrupt_controller_end(interrupt_ir0_clock);
 }
 
+//@Deprecated: Used For Test And Now Abandoned.
 __public void kernel_interrupt_svc_keyboard(byte scancode)
 {
 	video_put_char(scancode, 0x07);

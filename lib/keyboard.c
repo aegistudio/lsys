@@ -35,6 +35,7 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 
 	__keyboard_registry(keyboard_space, ' ', ' ');
 	__keyboard_registry(keyboard_enter, '\n', '\n');
+	__keyboard_registry(keyboard_tab, '\t', '\t');
 
 	__keyboard_registry(keyboard_a, 'a', 'A');
 	__keyboard_registry(keyboard_b, 'b', 'B');
@@ -81,6 +82,7 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 	__keyboard_registry(keyboard_dot, '.', '>');
 	__keyboard_registry(keyboard_slash, '/', '?');
 	__keyboard_registry(keyboard_backslash, '\\', '|');
+	__keyboard_registry(keyboard_upper_dot, '`', '~');
 	__keyboard_registry(keyboard_apostrophe, '\'', '\"');
 	__keyboard_registry(keyboard_minus, '-', '_');
 	__keyboard_registry(keyboard_equal, '=', '+');
@@ -120,6 +122,7 @@ __public void keyboard_processor(byte input)
 		{
 			if(state_changes)
 				event_handler(extension << 4 | input, is_down);
+			extension = 0;
 		}
 		else
 		{
@@ -131,7 +134,8 @@ __public void keyboard_processor(byte input)
 				byte ascii = keyboard_scancode_ascii[input];
 				shift = keyboard_scancode_state[keyboard_lshift]
 					| keyboard_scancode_state[keyboard_rshift];
-				caps_lock = !caps_lock;
+				if(input == keyboard_caps_lock)
+					caps_lock = !caps_lock;
 				if(ascii != 0)
 				{
 					if(caps_lock & !shift)
