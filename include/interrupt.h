@@ -69,6 +69,7 @@ __interrupt_h_export void interrupt_idt_set_pointer(dt_pointer* pointer, selecto
 __interrupt_h_export void interrupt_set_exception_handler(dword vector, exception_handler handler);
 __interrupt_h_export void interrupt_set_interrupt_handler(dword vector, interrupt_handler handler);
 
+#define interrupt_vector_base		0x20
 #define interrupt_ir0_clock		0x00
 #define interrupt_ir1_keyboard		0x01
 #define interrupt_ir2_slave		0x02

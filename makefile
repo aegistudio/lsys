@@ -32,6 +32,7 @@ lib.code:
 kernel.code: lib.code
 	@echo "Compiling The Code Of Kernel..."
 	@nasm kernel/kernel.asm -o bin/kernel/kernel.obj -f elf32
+	@nasm kernel/interrupt_service.asm -o bin/kernel/interrupt_service.obj -f elf32
 	@gcc -c kernel/protect.c -I include/ -o bin/kernel/protect.obj
 	@gcc -c kernel/video.c -I include/ -o bin/kernel/video.obj
 	@gcc -c kernel/interrupt.c -I include/ -o bin/kernel/interrupt.obj
