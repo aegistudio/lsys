@@ -32,6 +32,10 @@ void keyboard_event(word scancode, dword is_down)
 		pointer --;
 		input_buffer[pointer] = 0;
 	}
+	if(scancode >= keyboard_f1 && scancode >= keyboard_f5)
+	{
+
+	}
 	//if(is_down) video_put_char('#', 0x7f);
 	//else video_put_char('*', 0x7f);
 }
@@ -56,7 +60,7 @@ __public void kernel_interrupt_service()
 	color_now = 0x07;
 }
 
-byte update_counter;
+dword update_counter;
 __public void kernel_interrupt_svc_clock()
 {
 	if((update_counter & 0x04) != 0)
@@ -66,6 +70,14 @@ __public void kernel_interrupt_svc_clock()
 		if((update_counter & 0x08) != 0) video_put_char('_', color_now);
 	}
 	update_counter ++;
+
+	if(update_counter == 0x0fff)
+	{
+		int i = 0;
+		for(; i < sizeof(input_buffer); i ++) input_buffer[i] = 0;
+		pointer = 0;
+		update_counter = 0;
+	}
 	interrupt_controller_end(interrupt_ir0_clock);
 }
 
