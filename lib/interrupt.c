@@ -94,7 +94,7 @@ extern void exception_tag_19_simd_exception();
 __public void exception_handler_bus(dword vector, dword error_code, dword ip, selector cs, dword eflag)
 {
 	exception_handler handler = exception_handlers[vector];
-	handler(vector, error_code, ip, cs, eflag);
+	if(handler != 0) handler(vector, error_code, ip, cs, eflag);
 }
 
 #include "video.h"
@@ -186,12 +186,15 @@ __public void default_interrupt_handler()
 	interrupt_controller_end(0x08);
 }
 
-#define __interrupt_gate_setup(index, tag) gate_new(&idt[index], tag, cs, \
+__private selector interrupt_code_selector;
+
+#define __interrupt_gate_setup(index, tag) gate_new(&idt[index], tag, interrupt_code_selector, \
 		descriptor_gate_interrupt | descriptor_system_386 | descriptor_present, \
 		privilege_kernel);
 __public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)
 {
 	idt = (gate*)(pointer->base);
+	interrupt_code_selector = cs;
 	int i = 0;
 	for(; i < 20; i ++)
 		exception_handlers[i] = (exception_handler*)default_exception_handler;
@@ -217,7 +220,7 @@ __public void interrupt_idt_set_pointer(dt_pointer* pointer, selector cs)
 	 __interrupt_gate_setup(18, exception_tag_18_machine_check);
 	 __interrupt_gate_setup(19, exception_tag_19_simd_exception);
 
-	//for(i = 0x20; i <= 0x2f; i ++) __interrupt_gate_setup(i, asm_default_interrupt_handler);
+	for(i = 0x20; i <= 0x2f; i ++) __interrupt_gate_setup(i, asm_default_interrupt_handler);
 }
 #undef __interrupt_gate_setup
 

@@ -29,4 +29,4 @@ kernel_main:
 
 	sti
 
-	hlt
+	jmp $

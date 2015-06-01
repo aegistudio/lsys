@@ -20,13 +20,13 @@ typedef byte icw_general;
 #define icw_general_icw_mode_present	1
 #define icw_general_icw_mode_none	0
 
-#define icw_general_pic_single		1
+#define icw_general_pic_single		2
 #define icw_general_pic_cascade		0
 
-#define icw_general_call_int4		1
+#define icw_general_call_int4		4
 #define icw_general_call_int8		0
 
-#define icw_general_trigger_level	1
+#define icw_general_trigger_level	8
 #define icw_general_trigger_edge	0
 
 #define icw_vector_system_8086		0

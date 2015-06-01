@@ -1,10 +1,12 @@
 section .text
 global asm_interrupt_outb
-;asm_interrupt_outb(word port, byte word)
+;asm_interrupt_outb(dword port, byte word)
 asm_interrupt_outb:
-	mov eax, dword[esp + 4]
-	mov edx, dword[esp + 8]
+	mov edx, dword[esp + 4]
+	mov eax, dword[esp + 8]
 	out dx, al
+	nop
+	nop
 	nop
 	nop
 	ret
@@ -15,6 +17,8 @@ asm_interrupt_inb:
 	mov edx, dword[esp + 4]
 	mov eax, 0
 	in al, dx
+	nop
+	nop
 	nop
 	nop
 	ret
