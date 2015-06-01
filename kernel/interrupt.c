@@ -15,19 +15,28 @@ __public dt_pointer* kernel_interrupt_setup(selector* cs)
 }
 
 extern void asm_interrupt_svc_clock();
+extern void asm_interrupt_svc_keyboard();
+
 __public void kernel_interrupt_service()
 {
 	interrupt_controller_set(interrupt_ir0_clock, 1);
 	interrupt_set_interrupt_handler(interrupt_vector_base + interrupt_ir0_clock, asm_interrupt_svc_clock);
+
+	interrupt_controller_set(interrupt_ir1_keyboard, 1);
+	interrupt_set_interrupt_handler(interrupt_vector_base + interrupt_ir1_keyboard, asm_interrupt_svc_keyboard);
 }
 
 #include "video.h"
 byte color_clock = 0;
-
 __public void kernel_interrupt_svc_clock()
 {
-	video_put_char('#', color_clock & 0x0f);
-	color_clock += color_clock - 1;
+//	video_put_char('#', color_clock);
+	color_clock += 1;
 	interrupt_controller_end(interrupt_ir0_clock);
 }
 
+__public void kernel_interrupt_svc_keyboard(byte scancode)
+{
+	video_put_char(scancode, 0x07);
+	interrupt_controller_end(interrupt_ir1_keyboard);
+}
