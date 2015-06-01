@@ -12,6 +12,9 @@
 #pragma pack(push)
 #pragma pack(1)
 
+__constant(interrupt_master_8295a, 0x20);
+__constant(interrupt_slave_8295a, 0xa0);
+
 typedef byte icw_general;
 
 __constant(icw_general_base,			0x10);
@@ -59,6 +62,26 @@ __constant(icw_mode_fully_nested_special,	0x10);
 __constant(icw_mode_fully_nested_normal,	0x00);
 
 __interrupt_h_export void interrupt_controller_initialize();
+__interrupt_h_export void interrupt_controller_set(byte mask, byte enabled);
+__interrupt_h_export void interrupt_controller_end(byte mask);
+
+__constant(interrupt_ir0_clock,		0x00);
+__constant(interrupt_ir1_keyboard,	0x01);
+__constant(interrupt_ir2_slave,		0x02);
+__constant(interrupt_ir3_serial2,	0x03);
+__constant(interrupt_ir4_serial1,	0x04);
+__constant(interrupt_ir5_lpt2,		0x05);
+__constant(interrupt_ir6_floppy,	0x06);
+__constant(interrupt_ir7_lpt2,		0x07);
+
+__constant(interrupt_ir8_real_clock,	0x08);
+__constant(interrupt_ir9_redirect,	0x09);
+__constant(interrupt_ira_reserved,	0x0a);
+__constant(interrupt_irb_reserved,	0x0b);
+__constant(interrupt_irc_cursor,	0x0c);
+__constant(interrupt_ird_fpu,		0x0d);
+__constant(interrupt_ire_windchester,	0x0e);
+__constant(interrupt_irf_reserved,	0x0f);
 
 #pragma pack(pop)
 
