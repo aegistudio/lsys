@@ -27,6 +27,6 @@ kernel_main:
 	call kernel_video_setup
 
 	; Setup Interrupt Controllers And IDT.
-	;call kernel_interrupt_setup
+	call kernel_interrupt_setup
 
 	jmp $

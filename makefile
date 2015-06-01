@@ -35,7 +35,7 @@ kernel.code: lib.code
 	@gcc -c kernel/protect.c -I include/ -o bin/kernel/protect.obj
 	@gcc -c kernel/video.c -I include/ -o bin/kernel/video.obj
 	@gcc -c kernel/interrupt.c -I include/ -o bin/kernel/interrupt.obj
-	@ld bin/kernel/*.obj bin/lib/*.obj -o bin/kernel/kernel.elf -x --oformat elf32-i386 -e kernel_main -Ttext 0x30400
+	@ld bin/kernel/*.obj bin/lib/*.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."
