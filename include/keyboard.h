@@ -86,11 +86,12 @@
 #define keyboard_extension1	0xe1
 
 #define keyboard_uparrow	0xe048
-#define keyboard_downarrow	0xe04b
-#define keyboard_leftarrow	0xe050
+#define keyboard_downarrow	0xe050
+#define keyboard_leftarrow	0xe04b
 #define keyboard_rightarrow	0xe04d
 
 #define keyboard_insert		0xe052
+#define keyboard_delete		0xe053
 #define keyboard_home		0xe047
 #define keyboard_pageup		0xe049
 #define keyboard_pagedown	0xe051

@@ -40,6 +40,7 @@ __public void keyboard_initalize(keyboard_event_handler event, keyboard_input_ha
 	}
 
 	__keyboard_registry(keyboard_space, ' ', ' ');
+	__keyboard_registry(keyboard_backspace, '\b', '\b');
 	__keyboard_registry(keyboard_enter, '\n', '\n');
 	__keyboard_registry(keyboard_tab, '\t', '\t');
 
@@ -133,7 +134,7 @@ __public void keyboard_processor(byte input)
 		if(extension)
 		{
 			if(state_changes)
-				event_handler(extension << 4 | input, is_down);
+				event_handler(extension << 8 | input, is_down);
 			extension = 0;
 		}
 		else
