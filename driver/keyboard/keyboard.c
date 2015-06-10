@@ -1,8 +1,8 @@
 #ifndef __keyboard_c__
 #define __keyboard_c__
 
-#include "keyboard.h"
-#include "interrupt.h"
+#include "driver/keyboard.h"
+#include "driver/interrupt.h"
 
 __private byte keyboard_scancode_state[0xff];
 

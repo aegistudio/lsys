@@ -2,7 +2,7 @@
 #ifndef __interrupt_c__
 #define __interrupt_c__
 
-#include "interrupt.h"
+#include "driver/interrupt.h"
 
 extern void asm_interrupt_outb(word port, byte word);
 extern byte asm_interrupt_inb(word port);
@@ -94,7 +94,7 @@ __public void exception_handler_bus(dword vector, dword error_code, dword ip, se
 	if(handler != 0) handler(vector, error_code, ip, cs, eflag);
 }
 
-#include "video.h"
+#include "driver/video.h"
 const byte* exception_error_messages_0 = "#0: division_error";
 const byte* exception_error_messages_1 = "#1: debug";
 const byte* exception_error_messages_2 = "#2: nmi";

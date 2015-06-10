@@ -7,7 +7,6 @@ bin:
 	@mkdir bin/boot
 	@mkdir bin/kernel
 	@mkdir bin/lib
-	@mkdir bin/driver
 
 loader.code:
 	@echo "Making Loader Binaries..."

@@ -1,7 +1,7 @@
 #ifndef __video_c__
 #define __video_c__
 
-#include "video.h"
+#include "driver/video.h"
 
 extern void asm_video_brush_screen(dword and, dword or, dword begin_index, dword end_index);
 extern void asm_video_put_char(dword index, dword sequence);
