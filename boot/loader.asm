@@ -15,8 +15,8 @@ org 0100h
 jmp loaderCode16
 nop
 
-%include "boot/fat12header.inc"
-%include "protect.inc"
+%include "include/fat12header.inc"
+%include "include/protect.inc"
 
 loaderCode16:
 	; Setup Registers
@@ -178,7 +178,7 @@ loader.writeToEnd:
 	popa
 	ret
 
-%include "boot/floppy.inc"
+%include "include/floppy.inc"
 
 kernel.elf db "KERNEL  ELF"
 
@@ -557,4 +557,4 @@ reallocatingKernel.length equ $ - reallocatingKernel
 launchingKernel db "Launching kernel..."
 launchingKernel.length equ $ - launchingKernel
 
-%include "elf.inc"
+%include "include/elf.inc"

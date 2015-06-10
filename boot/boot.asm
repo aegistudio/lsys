@@ -4,7 +4,7 @@ bootSectorCodeJump:
 	jmp short bootCodeBody
 	nop
 
-%include "boot/fat12header.inc"
+%include "include/fat12header.inc"
 
 bootCodeBody:
 	; Initialize Segment Registers.
@@ -96,7 +96,7 @@ bootCodeBody:
 
 %define __no_find_directory__
 %define __no_kill_motor__
-%include "boot/floppy.inc"
+%include "include/floppy.inc"
 
 bootDisplayString:
 	; Parameters:
