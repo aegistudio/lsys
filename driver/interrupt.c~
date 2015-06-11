@@ -129,7 +129,7 @@ __private byte* convert_hex(dword hex, int bits)
 		pointer --;
 		*pointer = (hex & 0x0000000f);
 		if(*pointer < 10) *pointer += '0';
-		else *pointer += 'a';
+		else *pointer += 'a' - 10;
 		hex = hex >> 4;
 	}
 	return pointer;
@@ -169,9 +169,10 @@ __private void default_exception_handler(dword vector, interrupt_stack_frame* st
 
 		video_put_string("\n========================================", 0x07);
 	}
+	while(1);
 }
 
-extern void asm_default_interrupt_handler( interrupt_stack_frame*);
+extern void asm_default_interrupt_handler(interrupt_stack_frame*);
 __public void default_interrupt_handler()
 {
 	video_put_string("\n=======default_interrupt_handler==========", 0x07);

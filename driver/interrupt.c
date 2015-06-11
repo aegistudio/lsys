@@ -129,7 +129,7 @@ __private byte* convert_hex(dword hex, int bits)
 		pointer --;
 		*pointer = (hex & 0x0000000f);
 		if(*pointer < 10) *pointer += '0';
-		else *pointer += 'a';
+		else *pointer += 'a' - 10;
 		hex = hex >> 4;
 	}
 	return pointer;
