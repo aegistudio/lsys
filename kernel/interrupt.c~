@@ -106,7 +106,7 @@ void insert_at_pointer(byte current)
 }
 
 dword update_counter;
-__public interrupt_stack_frame* clock_handler(interrupt_stack_frame* stack_frame)
+__public stack_frame* clock_handler(interrupt_stack_frame* stack_frame)
 {
 	if((update_counter & 0x04) != 0)
 	{
