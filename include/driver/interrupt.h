@@ -75,6 +75,10 @@ __interrupt_h_export void interrupt_controller_end(byte mask);
 
 typedef struct __interrupt_stack_frame
 {
+	/** recorded by calling registers manually. **/
+	selector idt;
+	word preserved_idt;
+
 	/** recorded by pushing registers into stack manually. **/
 	selector es;
 	word preserved_es;
