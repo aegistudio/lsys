@@ -32,5 +32,4 @@ kernel_main:
 	call kernel_interrupt_service
 	sti
 
-	ud2
 	jmp $
