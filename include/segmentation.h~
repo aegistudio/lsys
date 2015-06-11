@@ -6,10 +6,10 @@
  * is related to segmentation in protected mode of cpu.
 ********************************************************************/
 
+#include "define.h"
+
 #ifndef __segmentation_h__
 #define __segmentation_h__
-
-#include "define.h"
 
 #ifndef __segmentation_c__
 	#define __segmentation_h_func__ extern

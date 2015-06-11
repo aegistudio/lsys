@@ -92,7 +92,7 @@ typedef struct __interrupt_stack_frame
 	dword edi;
 	dword esi;
 	dword ebp;
-	dword reg_esp;
+	dword esp;
 	dword ebx;
 	dword edx;
 	dword ecx;
