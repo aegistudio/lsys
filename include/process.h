@@ -105,7 +105,6 @@ typedef struct __pcb_t
 {
 	char name[12];
 	interrupt_stack_frame state_frame;
-	tss task_state_segment;
 }
 process;
 

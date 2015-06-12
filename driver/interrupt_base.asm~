@@ -23,6 +23,56 @@ asm_interrupt_inb:
 	nop
 	ret
 
+global interrupt_preserved_ds
+global interrupt_preserved_es
+global interrupt_preserved_fs
+	interrupt_preserved_ds		dd	0
+	interrupt_preserved_es		dd	0
+	interrupt_preserved_fs		dd	0
+
+global asm_interrupt_save_dataregs
+asm_interrupt_save_dataregs:
+	push eax
+	mov eax, 0
+
+	mov eax, ds
+	mov dword[interrupt_preserved_ds], eax
+
+	mov eax, es
+	mov dword[interrupt_preserved_es], eax
+
+	mov eax, fs
+	mov dword[interrupt_preserved_fs], eax
+	pop eax
+	ret
+
+global asm_interrupt_load_dataregs
+asm_interrupt_load_dataregs:
+	push eax
+	mov eax, dword[cs : interrupt_preserved_ds]
+	mov ds, ax
+	mov eax, dword[cs : interrupt_preserved_es]
+	mov es, ax
+	mov eax, dword[cs : interrupt_preserved_fs]
+	mov fs, ax
+	pop eax
+	ret
+
+global asm_interrupt_get_cs
+asm_interrupt_get_cs:
+	mov eax, 0
+	mov eax, cs
+	ret
+
+global asm_interrupt_set_idt
+asm_interrupt_set_idt:
+	push eax
+	mov eax, dword[ss : esp + 8]
+	lidt [eax]
+	jmp $
+	pop eax
+	ret
+
 global exception_tag_0_division_error
 global exception_tag_1_debug
 global exception_tag_2_nmi
@@ -142,11 +192,7 @@ exception_tag_19_simd_exception:
 	push 19
 	jmp exception_tag_bus
 exception_tag_bus:
-	mov eax, dword[interrupt_data_selector]
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-
+	call asm_interrupt_load_dataregs
 	call exception_handler_bus
 	add esp, 4
 	int_restore
@@ -158,11 +204,7 @@ extern default_interrupt_handler
 asm_default_interrupt_handler:
 	push 0
 	int_save
-	mov eax, dword[interrupt_data_selector]
-	mov ds, eax
-	mov es, eax
-	mov fs, eax
-
+	call asm_interrupt_load_dataregs
 	call default_interrupt_handler
 	int_restore
 	add esp, 4

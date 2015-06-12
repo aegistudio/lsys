@@ -26,7 +26,6 @@ kernel_main:
 	push eax
 
 	call kernel_interrupt_setup
-	lidt [eax]
 
 	; Enable Some Interrupt And Set Their Routines
 	call kernel_interrupt_service

@@ -7,7 +7,7 @@
 		push fs
 		push ds
 		push es
-		sub esp, 8
+		sub esp, 4
 		sldt [ss : esp]
 		push esp
 	%endmacro
@@ -15,7 +15,7 @@
 	%macro int_restore 0
 		pop esp
 		lldt [ss : esp]
-		add esp, 8
+		add esp, 4
 		pop es
 		pop ds
 		pop fs

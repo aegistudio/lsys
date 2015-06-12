@@ -25,10 +25,14 @@ asm_scheduler_set_gdt:
 	lgdt [gdt_pointer]
 	ret
 
-global asm_scheduler_set_ldt
-asm_scheduler_set_ldt:
-	mov eax, dword[ss : (esp + 4)]
+global asm_scheduler_set_taskregs
+asm_scheduler_set_taskregs:
+	push eax
+	mov eax, dword[ss : (esp + 8)]
 	lldt ax
+	mov eax, dword[ss : (esp + 12)]
+	ltr ax
+	pop eax;
 	ret
 
 global asm_scheduler_get_selectors
@@ -93,5 +97,4 @@ asm_scheduler_set_selectors:
 	scheduler_transmit_instruction:
 
 	popa
-	jmp $
 	ret
