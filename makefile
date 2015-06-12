@@ -36,7 +36,8 @@ driver.code:
 lib.code:
 	@echo "Compiling The Code Of Libraries..."
 	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
-
+	@gcc -c lib/scheduler.c -I include/ -o bin/lib/scheduler.obj
+	@nasm lib/scheduler_base.asm -o bin/lib/scheduler_base.obj -f elf32
 
 kernel.code: lib.code driver.code
 	@echo "Compiling The Code Of Kernel..."

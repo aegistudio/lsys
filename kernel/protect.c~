@@ -20,6 +20,5 @@ __public dt_pointer* kernel_gdt_migration(dt_pointer* old_pointer)
 */
 
 __public void kernel_gdt_migration()
-{
 	scheduler_initialize();	
 }

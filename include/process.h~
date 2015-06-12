@@ -103,7 +103,7 @@ tss;
 
 typedef struct __pcb_t
 {
-	char name[12];
+	char[12] name;
 	interrupt_stack_frame state_frame;
 	tss task_state_segment;
 }
