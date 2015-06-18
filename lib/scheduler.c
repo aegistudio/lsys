@@ -4,12 +4,11 @@
 #include "process.h"
 
 __public dt_pointer gdt_pointer;
-__public descriptor gdt[0x1000];
+__public descriptor gdt[process_maxcount];
 
 tss global_tss;
 
-process* process_control_blocks[0x1000];
-process kernel;
+process process_control_blocks[process_maxcount];
 __private int current_process;
 
 standard_ldt kernel_ldt;
@@ -69,7 +68,7 @@ __scheduler_export void scheduler_initialize()
 
 	/**************		Reset Process Control Block Of Kernel	**********************/
 	current_process = 0;
-	process_control_blocks[0] = &kernel;
+	process_control_blocks[0].state = process_state_running | process_state_daemon;
 }
 
 void scheduler_copy_descriptor(selector ldt_selector, selector selector)
@@ -91,15 +90,14 @@ __scheduler_export void scheduler_execute(char* pname, selector ldt, dword eip)
 __scheduler_export interrupt_stack_frame* scheduler_schedule(interrupt_stack_frame* stack_frame)
 {
 	/**	Save Processor State	**/
-	process* pcb = process_control_blocks[current_process];
-	pcb->stack_frame = stack_frame;
+	process_control_blocks[current_process].stack_frame = stack_frame;
 
 	/**	Determine The Next Process To Invoke	**/
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
-	global_tss.stacks[0].esp = process_control_blocks[current_process]->kernel_esp;
-	global_tss.stacks[0].ss = process_control_blocks[current_process]->kernel_ss;
-	stack_frame = process_control_blocks[current_process]->stack_frame;
+	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
+	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+	stack_frame = process_control_blocks[current_process].stack_frame;
 	return stack_frame;
 }
 

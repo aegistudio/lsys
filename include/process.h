@@ -101,6 +101,8 @@ tss;
 
 #include "driver/interrupt.h"
 
+#define process_maxcount			0x1000
+
 #define process_state_switchable		0x0001
 #define process_state_daemon			0x0000
 #define process_state_userinterface		0x0001
