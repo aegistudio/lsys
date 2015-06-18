@@ -83,25 +83,23 @@ void scheduler_copy_descriptor(int ldt_index, selector selector)
 
 __scheduler_export void scheduler_execute(char* pname, selector ldt, dword eip)
 {
-	
+	/**	We Can Initialize The Process By Pushing A Interrupt Stack Frame (Or Processor State
+	Word Into The Stack Corresponding To The Stack Segment Of The Allocated Process, So We Could
+	Schedule It Just Like A Running Process.	**/
 }
 
 __scheduler_export interrupt_stack_frame* scheduler_schedule(interrupt_stack_frame* stack_frame)
 {
 	/**	Save Processor State	**/
 	process* pcb = process_control_blocks[current_process];
-	byte* destination = &(pcb->stack_frame);
-	byte* source = stack_frame;
-	int i = 0;
-	for(; i < sizeof(interrupt_stack_frame); i ++)
-		destination[i] = source[i];
+	pcb->stack_frame = stack_frame;
 
 	/**	Determine The Next Process To Invoke	**/
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
 	global_tss.stacks[0].esp = process_control_blocks[current_process]->kernel_esp;
 	global_tss.stacks[0].ss = process_control_blocks[current_process]->kernel_ss;
-	stack_frame = &(process_control_blocks[current_process]->stack_frame);
+	stack_frame = process_control_blocks[current_process]->stack_frame;
 	return stack_frame;
 }
 

@@ -105,12 +105,9 @@ typedef struct __interrupt_stack_frame
 	/** record in order to be compatible with exception. **/
 	dword error_code;
 
-	/** recorded when interrupt occurs. **/
 	dword eip;
 	dword cs;
 	dword eflags;
-	dword esp;
-	dword ss;
 }
 interrupt_stack_frame;
 

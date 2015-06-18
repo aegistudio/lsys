@@ -105,12 +105,39 @@ tss;
 #define process_state_daemon			0x0000
 #define process_state_userinterface		0x0001
 
+#define process_state_fsm			0x000e
+#define process_state_ready			0x0000
+#define process_state_running			0x0002
+#define process_state_blocked			0x0004
+
+#define stdidt_selector_cs			0x0000
+#define stdidt_selector_ds			0x0008
+#define stdidt_selector_es			0x0010
+#define stdidt_selector_fs			0x0018
+#define stdidt_selector_gs			0x0020
+#define stdidt_selector_ss			0x0028
+#define stdidt_selector_ks			0x0030
+#define stdidt_selector_is			0x0038
+
+typedef struct __standard_idt_t
+{
+	descriptor code_segment;
+	descriptor data_segment;
+	descriptor edata_segment;
+	descriptor fdata_segment;
+	descriptor graphic_segment;
+	descriptor stack_segment;
+	descriptor kernel_stack_segment;
+	descriptor interrupt_segment;
+}
+standard_idt;
 
 typedef struct __pcb_t
 {
-	char name[12];
-	char state;
-	interrupt_stack_frame stack_frame;
+	byte name[12];
+	byte state;
+	byte invoke;
+	interrupt_stack_frame* stack_frame;
 
 	/** Will Be Updated When Process Switches! **/
 	selector kernel_ss;

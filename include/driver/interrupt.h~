@@ -106,11 +106,12 @@ typedef struct __interrupt_stack_frame
 	dword error_code;
 
 	/** recorded when interrupt occurs. **/
+	dword esp;
+	dword ss;
+
 	dword eip;
 	dword cs;
 	dword eflags;
-	dword esp;
-	dword ss;
 }
 interrupt_stack_frame;
 
