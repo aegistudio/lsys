@@ -5,22 +5,30 @@ section .text
 global asm_video_brush_screen
 ;asm_video_brush_screen(dword and, dword or, dword index_first, dword index_second);
 asm_video_brush_screen:
-	mov	ebx,	dword[ss : (esp + 12)]		; i = index_first
-	mov	edx,	dword[ss : (esp + 16)]
+	push ebp
+	mov ebp, esp
+	pusha
+
+	mov	ebx,	dword[ss : (ebp + 16)]		; i = index_first
+	mov	edx,	dword[ss : (ebp + 20)]
 	video_clear_screen.lineloop:
 	cmp	ebx,	edx
 	jge	video_clear_screen.lineend	; for(; i < index_second; i += 4){
 
 	mov	eax,	dword[gs : ebx]		; dword brushed = *((dword*)current_pos);
-	mov	esi,	dword[ss : (esp + 4)]
+	mov	esi,	dword[ss : (ebp + 8)]
 	and	eax,	esi			; brushed &= and;
-	mov	esi,	dword[ss : (esp + 8)]
+	mov	esi,	dword[ss : (ebp + 12)]
 	or	eax,	esi			; brushed |= or;
 
 	mov	dword[gs : ebx], eax		; *((dword*)current_pos) = brushed;
 	add	ebx,	4
 	jmp video_clear_screen.lineloop
+
 	video_clear_screen.lineend:
+	popa
+	mov esp, ebp
+	pop ebp
 	ret
 
 global asm_video_put_char

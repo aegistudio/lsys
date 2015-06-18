@@ -5,6 +5,7 @@ extern kernel_interrupt_setup
 extern kernel_interrupt_service
 
 extern video_put_char
+extern asm_video_brush_screen
 
 section .bss
 kernel.stack		resd	1024 * 2
@@ -38,4 +39,12 @@ kernel_main:
 	push 0x40
 	call video_put_char
 	add esp, 8
+
+	push 0x0220
+	push 0x0000
+	push 0xe0004000
+	push 0xffffffff
+	call asm_video_brush_screen
+	add esp, 16
+
 	jmp print
