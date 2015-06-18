@@ -110,16 +110,16 @@ tss;
 #define process_state_running			0x0002
 #define process_state_blocked			0x0004
 
-#define stdidt_selector_cs			0x0000
-#define stdidt_selector_ds			0x0008
-#define stdidt_selector_es			0x0010
-#define stdidt_selector_fs			0x0018
-#define stdidt_selector_gs			0x0020
-#define stdidt_selector_ss			0x0028
-#define stdidt_selector_ks			0x0030
-#define stdidt_selector_is			0x0038
+#define stdldt_selector_cs			0x0000
+#define stdldt_selector_ds			0x0008
+#define stdldt_selector_es			0x0010
+#define stdldt_selector_fs			0x0018
+#define stdldt_selector_gs			0x0020
+#define stdldt_selector_ss			0x0028
+#define stdldt_selector_ks			0x0030
+#define stdldt_selector_is			0x0038
 
-typedef struct __standard_idt_t
+typedef struct __standard_ldt_t
 {
 	descriptor code_segment;
 	descriptor data_segment;
@@ -130,7 +130,7 @@ typedef struct __standard_idt_t
 	descriptor kernel_stack_segment;
 	descriptor interrupt_segment;
 }
-standard_idt;
+standard_ldt;
 
 typedef struct __pcb_t
 {
