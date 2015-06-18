@@ -52,7 +52,7 @@ void descriptor_set_attribute(descriptor *d, dword attribute, dword privilege)
 	d->attribute_limit_high |= (attribute & 0xf0ff);
 }
 
-dword descriptor_get_privilege(descriptor *d)
+void descriptor_get_privilege(descriptor *d)
 {
 	return (d->attribute_limit_high) >> 5 & 0x03;
 }

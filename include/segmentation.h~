@@ -56,7 +56,7 @@ __segmentation_h_func__ void descriptor_set_limit(descriptor* d, dword limit);
 __segmentation_h_func__ dword descriptor_get_base(descriptor *d);
 __segmentation_h_func__ void descriptor_set_base(descriptor *d, dword base);
 __segmentation_h_func__ dword descriptor_get_attribute(descriptor *d);
-__segmentation_h_func__ dword descriptor_get_privilege(descriptor *d);
+__segmentation_h_func__ void descriptor_get_privilege(descriptor *d);
 __segmentation_h_func__ void descriptor_set_attribute(descriptor *d, dword attribute, dword privilege);
 __segmentation_h_func__ void descriptor_new(descriptor *d, dword base, dword limit, dword attribute, dword privilege);
 

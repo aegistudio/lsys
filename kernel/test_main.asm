@@ -10,7 +10,7 @@ extern video_put_char
 section .data
 	test_main_data:
 	runtime_stack	resd	60
-	test_main_stack_base dd $ - runtime_stack
+	test_main_stack_limit dd $ - runtime_stack
 	test_main_pcb:
 		times 40 dd 0
 	test_main_stdldt:
