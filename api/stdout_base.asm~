@@ -1,0 +1,7 @@
+global asm_system_call_stdout
+section .text:
+
+asm_systemcall_stdout:
+	jmp $
+	retf
+

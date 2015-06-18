@@ -51,7 +51,7 @@ kernel.code: lib.code driver.code api.code
 
 api.code:
 	@echo "Compiling The Code Of API..."
-	@nasm api/stdout_base.asm -o bin/api/stdout_base.obj -f elf32
+	@nasm api/stdout_base.asm -o bin/api/stdout_base.obj
 	@gcc -c api/stdout.c -I include/ -o bin/api/stdout.obj
 
 boot.sector.image: boot.sector.code lsys.img

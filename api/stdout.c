@@ -1,0 +1,17 @@
+#ifndef __stdout_c__
+#define __stdout_c__
+
+#define __systemcall_impl__
+
+#include "define.h"
+#include "systemcall.h"
+#include "driver/interrupt.h"
+
+extern asm_systemcall_stdout(interrupt_stack_frame*);
+
+__public void systemcall_stdout_initialize()
+{
+	interrupt_set_interrupt_handler(systemcall_stdout, asm_systemcall_stdout);
+}
+
+#endif

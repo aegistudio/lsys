@@ -146,7 +146,7 @@ __public void kernel_interrupt_service()
 */
 
 #include "process.h"
-#include "systemcall.h"
+#include "system_call.h"
 __public void kernel_interrupt_service()
 {
 	clock_initialize(scheduler_schedule);
