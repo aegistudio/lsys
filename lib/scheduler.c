@@ -101,7 +101,7 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(interrupt_stack_fra
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
 	global_tss.stacks[0].esp = process_control_blocks[current_process]->kernel_esp;
 	global_tss.stacks[0].ss = process_control_blocks[current_process]->kernel_ss;
-	stack_frame = process_control_blocks[current_process];
+	stack_frame = &(process_control_blocks[current_process]->stack_frame);
 	return stack_frame;
 }
 

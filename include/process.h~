@@ -101,9 +101,15 @@ tss;
 
 #include "driver/interrupt.h"
 
+#define process_state_switchable		0x0001
+#define process_state_daemon			0x0000
+#define process_state_userinterface		0x0001
+
+
 typedef struct __pcb_t
 {
 	char name[12];
+	char state;
 	interrupt_stack_frame stack_frame;
 
 	/** Will Be Updated When Process Switches! **/
