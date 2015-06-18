@@ -93,12 +93,19 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 {
 	/**	Save Processor State	**/
 	process_control_blocks[current_process].stack_frame = stack_frame;
+	process_control_blocks[current_process].esp = *esp;
+	process_control_blocks[current_process].ss = *ss;
 
 	/**	Determine The Next Process To Invoke	**/
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
 	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
 	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+
+	*ldt = process_control_blocks[current_process].stack_frame->ldt;
+	*ss = process_control_blocks[current_process].ss;
+	*esp = process_control_blocks[current_process].esp;
+
 	stack_frame = process_control_blocks[current_process].stack_frame;
 	return stack_frame;
 }

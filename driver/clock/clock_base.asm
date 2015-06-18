@@ -16,8 +16,6 @@ extern asm_interrupt_load_dataregs
 
 		mov dword[asm_clock_save_esp], esp
 		mov word[asm_clock_save_ss], ss
-		mov eax, dword[ss : esp + 4]	; Pointer To LDT
-		mov dword[asm_clock_save_ldt], eax
 
 		push asm_clock_save_esp
 		push asm_clock_save_ss

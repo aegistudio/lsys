@@ -144,6 +144,9 @@ typedef struct __pcb_t
 	byte invoke;
 	interrupt_stack_frame* stack_frame;
 
+	selector ss;
+	dword esp;
+
 	/** Will Be Updated When Process Switches! **/
 	selector kernel_ss;
 	dword kernel_esp;
