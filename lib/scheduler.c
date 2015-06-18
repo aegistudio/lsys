@@ -88,7 +88,8 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	Schedule It Just Like A Running Process.	**/
 }
 
-__scheduler_export interrupt_stack_frame* scheduler_schedule(interrupt_stack_frame* stack_frame)
+__scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
+	interrupt_stack_frame* stack_frame)
 {
 	/**	Save Processor State	**/
 	process_control_blocks[current_process].stack_frame = stack_frame;
