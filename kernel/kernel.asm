@@ -4,6 +4,8 @@ extern kernel_video_setup
 extern kernel_interrupt_setup
 extern kernel_interrupt_service
 
+extern video_put_char
+
 section .bss
 kernel.stack		resd	1024 * 2
 kernel.stack_base:
@@ -24,11 +26,16 @@ kernel_main:
 	mov eax, 0
 	mov eax, cs
 	push eax
-
 	call kernel_interrupt_setup
+	add esp, 4
 
 	; Enable Some Interrupt And Set Their Routines
 	call kernel_interrupt_service
-	sti
+	;sti
 
-	jmp $
+	print:
+	push 0x02
+	push 0x40
+	call video_put_char
+	add esp, 8
+	jmp print
