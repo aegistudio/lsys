@@ -14,7 +14,7 @@ kernel.stack_base:
 old_gdt_pointer		resd	6
 
 section .text
-kernel_main_test_string		db	"ABCDEFG", 0
+kernel_main_test_string		db	"010", 0
 kernel_main:
 	; Resetting Stack And Global Descriptor Table.
 	mov esp, kernel.stack_base
@@ -36,20 +36,9 @@ kernel_main:
 	sti
 
 	print:
-	push 0x02
-	push 0x40
-	call video_put_char
-	add esp, 8
-
-	push 0x0220
-	push 0x0000
-	push 0xe0004000
-	push 0xffffffff
-	call asm_video_brush_screen
-	add esp, 16
 
 	mov eax, 1
-	mov esi, 0x0007
+	mov esi, 0x0002
 	mov edi, kernel_main_test_string
 	int 21h
 
