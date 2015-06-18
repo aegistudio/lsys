@@ -14,7 +14,7 @@ kernel.stack_base:
 old_gdt_pointer		resd	6
 
 section .text
-kernel_main_test_string		db	"ABCDEFGH", 0
+kernel_main_test_string		db	"ABCDEFG", 0
 kernel_main:
 	; Resetting Stack And Global Descriptor Table.
 	mov esp, kernel.stack_base
