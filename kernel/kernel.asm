@@ -32,7 +32,7 @@ kernel_main:
 
 	; Enable Some Interrupt And Set Their Routines
 	call kernel_interrupt_service
-	;sti
+	sti
 
 	print:
 	push 0x02
@@ -40,11 +40,11 @@ kernel_main:
 	call video_put_char
 	add esp, 8
 
-	push 0x0220
-	push 0x0000
-	push 0xe0004000
-	push 0xffffffff
-	call asm_video_brush_screen
-	add esp, 16
+	;push 0x0220
+	;push 0x0000
+	;push 0xe0004000
+	;push 0xffffffff
+	;call asm_video_brush_screen
+	;add esp, 16
 
 	jmp print

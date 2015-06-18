@@ -90,9 +90,9 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(interrupt_stack_fra
 {
 	/**	Save Processor State	**/
 	process* pcb = process_control_blocks[current_process];
-	int i = 0;
-	byte* destination = &pcb->stack_frame;
+	byte* destination = &(pcb->stack_frame);
 	byte* source = stack_frame;
+	int i = 0;
 	for(; i < sizeof(interrupt_stack_frame); i ++)
 		destination[i] = source[i];
 
