@@ -80,7 +80,8 @@ void scheduler_copy_descriptor(selector ldt_selector, selector selector)
 	for(; i < 8; i ++) destin_base[i] = source_base[i];
 }
 
-__scheduler_export void scheduler_execute(char* pname, selector ldt, dword eip)
+__scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dword eip, dword esp,
+	dword kernel_ss, dword kernel_esp)
 {
 	/**	We Can Initialize The Process By Pushing A Interrupt Stack Frame (Or Processor State
 	Word Into The Stack Corresponding To The Stack Segment Of The Allocated Process, So We Could
