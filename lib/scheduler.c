@@ -82,6 +82,10 @@ void scheduler_copy_descriptor(selector ldt_selector, selector selector)
 	for(; i < 8; i ++) destin_base[i] = source_base[i];
 }
 
+extern interrupt_stack_frame* asm_scheduler_get_stackframe();
+extern void asm_scheduler_copy_stackframe(selector destin_selector, selector begin, selector end);
+
+/**		This Method Could Only Be Called In Kernel			***/
 __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dword eip, dword esp, dword eflags,
 	dword kernel_esp, word initstate)
 {
@@ -94,19 +98,27 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	process_control_blocks[idx].kernel_esp = kernel_esp;
 	process_control_blocks[idx].ss = selector_new(stdldt_selector_ss, selector_local, privilege_system);
 	process_control_blocks[idx].esp = esp - sizeof(interrupt_stack_frame) - 1;
-	dword address = descriptor_get_base(&(stdldt->stack_segment)) + process_control_blocks[idx].esp;
-	interrupt_stack_frame* stack_frame = (void*)address;
 
-	stack_frame->cs = selector_new(stdldt_selector_cs, selector_local, descriptor_get_privilege(&stdldt->code_segment));
-	stack_frame->eip = eip;
-	stack_frame->ds = selector_new(stdldt_selector_ds, selector_local, descriptor_get_privilege(&stdldt->data_segment));
-	stack_frame->es = selector_new(stdldt_selector_es, selector_local, descriptor_get_privilege(&stdldt->edata_segment));
-	stack_frame->fs = selector_new(stdldt_selector_fs, selector_local, descriptor_get_privilege(&stdldt->fdata_segment));
-	stack_frame->gs = selector_new(stdldt_selector_gs, selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
+	int i = 0;
+	byte* destin = &(kernel_ldt.kernel_stack_segment);
+	byte* source = &(stdldt->stack_segment);
+	for(; i < 8; i ++) destin[i] = source[i];
+	selector destin_selector = selector_new(stdldt_selector_ks, selector_local, descriptor_get_privilege(&stdldt->stack_segment));
+
+	interrupt_stack_frame* scheduler_temp_stack_frame = asm_scheduler_get_stackframe();
+
+	scheduler_temp_stack_frame->cs = selector_new(stdldt_selector_cs, selector_local, descriptor_get_privilege(&stdldt->code_segment));
+	scheduler_temp_stack_frame->eip = eip;
+	scheduler_temp_stack_frame->ds = selector_new(stdldt_selector_ds, selector_local, descriptor_get_privilege(&stdldt->data_segment));
+	scheduler_temp_stack_frame->es = selector_new(stdldt_selector_es, selector_local, descriptor_get_privilege(&stdldt->edata_segment));
+	scheduler_temp_stack_frame->fs = selector_new(stdldt_selector_fs, selector_local, descriptor_get_privilege(&stdldt->fdata_segment));
+	scheduler_temp_stack_frame->gs = selector_new(stdldt_selector_gs, selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
 	process_control_blocks[idx].ldt
 		= selector_new(idx * sizeof(descriptor), selector_global, descriptor_get_privilege(&stdldt->code_segment));
-	stack_frame->ldt = process_control_blocks[idx].ldt;
-	stack_frame->eflags = eflags;
+	scheduler_temp_stack_frame->ldt = process_control_blocks[idx].ldt;
+	scheduler_temp_stack_frame->eflags = eflags;
+
+	asm_scheduler_copy_stackframe(destin_selector, process_control_blocks[idx].esp, esp);
 
 	descriptor_new(&gdt[idx], stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
 	process_control_blocks[idx].stack_frame = process_control_blocks[idx].esp;
@@ -167,6 +179,7 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
 	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
 
+	*ldt = 0;
 	*ldt = process_control_blocks[current_process].ldt;
 	*ss = process_control_blocks[current_process].ss;
 	*esp = process_control_blocks[current_process].esp;

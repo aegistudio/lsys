@@ -12,6 +12,7 @@ section .bss
 	scheduler_ss	resb 4
 	scheduler_gs	resb 4
 	scheduler_cs	resb 4
+	scheduler_temp_stack_frame resd	40
 
 extern gdt_pointer
 section .text
@@ -33,6 +34,40 @@ asm_scheduler_set_taskregs:
 	mov eax, dword[ss : (esp + 12)]
 	ltr ax
 	pop eax;
+	ret
+
+global asm_scheduler_get_stackframe
+global asm_scheduler_copy_stackframe
+asm_scheduler_get_stackframe:
+	mov eax, scheduler_temp_stack_frame
+	ret
+	
+asm_scheduler_copy_stackframe:
+	push ebp
+	mov ebp, esp
+	pusha
+	push fs
+
+	mov eax, dword[ss : ebp + 8]
+	mov fs, ax			; FS = Destin Selector
+
+	mov eax, dword[ss : ebp + 12]	; EAX = Begin
+	mov edx, scheduler_temp_stack_frame
+
+	loop_copy_stack_frame:
+	mov ebx, dword[ss : ebp + 16]	; EBX = End
+	cmp eax, ebx
+	jge end_copy_stack_frame
+		mov cl, byte[ds : edx]
+		mov byte[fs : eax], cl
+		inc edx
+		inc eax
+	jmp loop_copy_stack_frame
+	end_copy_stack_frame:
+	pop fs
+	popa
+	mov esp, ebp
+	pop ebp
 	ret
 
 global asm_scheduler_get_selectors
