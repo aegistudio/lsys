@@ -151,4 +151,5 @@ __public void kernel_interrupt_service()
 {
 	clock_initialize(scheduler_schedule);
 	systemcall_stdout_initialize();
+	systemcall_process_initialize();
 }

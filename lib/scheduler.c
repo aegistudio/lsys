@@ -131,7 +131,57 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	asm_scheduler_set_gdt();
 }
 
-#include "driver/video.h"
+__private void scheduler_pick()
+{
+	int i;
+	int hasFound = 0;
+	for(i = current_process + 1; i < total_process; i ++)
+		if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
+		{
+			current_process = i;
+			hasFound = 1;
+			break;
+		}
+	if(hasFound == 0)
+		for(i = 9; i < current_process; i ++)
+			if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
+		{
+			current_process = i;
+			hasFound = 1;
+			break;
+		}
+	if(hasFound == 0) current_process = 8;
+}
+
+/*******	Calling This Method Will Force Current Process To Discard Processor!	***/
+__scheduler_export void scheduler_sleep(dword mills, selector* ldt, selector* ss,
+	dword* esp, interrupt_stack_frame* stack_frame)
+{
+	/**	Save Processor State	**/
+	process_control_blocks[current_process].stack_frame = stack_frame;
+	process_control_blocks[current_process].ldt = *ldt;	
+	process_control_blocks[current_process].esp = *esp;
+	process_control_blocks[current_process].ss = *ss;
+
+	process_control_blocks[current_process].state
+		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_sleeping;
+	process_control_blocks[current_process].tag = mills;
+
+	scheduler_pick();
+
+	/**	Pick Up Another Process	**/
+	process_control_blocks[current_process].state
+			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_running;
+
+	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
+	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+
+	*ldt = 0;
+	*ldt = process_control_blocks[current_process].ldt;
+	*ss = process_control_blocks[current_process].ss;
+	*esp = process_control_blocks[current_process].esp;
+}
+
 __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
 	interrupt_stack_frame* stack_frame)
 {
@@ -154,25 +204,8 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 			= process_control_blocks[i].state & process_state_fsm_negate | process_state_ready;
 	}
 
-
 	/**	Determine The Next Process To Invoke	**/
-	int hasFound = 0;
-	for(i = current_process + 1; i < total_process; i ++)
-		if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
-		{
-			current_process = i;
-			hasFound = 1;
-			break;
-		}
-	if(hasFound == 0)
-		for(i = 9; i < current_process; i ++)
-			if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
-		{
-			current_process = i;
-			hasFound = 1;
-			break;
-		}
-	if(hasFound == 0) current_process = 8;
+	scheduler_pick();
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
 	process_control_blocks[current_process].state

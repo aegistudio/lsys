@@ -23,7 +23,7 @@ __systemcall_api void systemcall_stdout_initialize();
 
 #define systemcall_process	0x23
 #define process_yield		0x00
-#define process_sleep		0x01
+#define process_sleep		0x01	/** EDI = MILLS TO SLEEP **/
 #define process_terminate	0x02
 
 #define systemcall_semaphore	0x24
