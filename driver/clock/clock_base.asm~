@@ -36,5 +36,6 @@ extern asm_interrupt_load_dataregs
 		pop gs
 		popad
 		add esp, 4
+		jmp $
 		sti
 		iretd

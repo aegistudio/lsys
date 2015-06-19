@@ -22,12 +22,14 @@ section .bss
 	
 
 section .text
+test_main_string	db		"Inside test main now!", 0
 extern test_main_init
 	test_main:
-	push 0x72
-	push 0x40
-	call video_put_char
-	add esp, 8
+	jmp $
+	mov eax, 1
+	mov esi, 0x0002
+	mov edi, test_main_string
+	int 21h
 	jmp test_main
 	end_of_test_main	equ	$ - test_main
 

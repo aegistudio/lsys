@@ -35,7 +35,7 @@ kernel_main:
 	; Enable Some Interrupt And Set Their Routines
 	call kernel_interrupt_service
 
-;	call asm_test_main_init
+	call asm_test_main_init
 
 	sti
 
