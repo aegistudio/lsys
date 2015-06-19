@@ -70,7 +70,7 @@ __scheduler_export void scheduler_initialize()
 	/**************		Reset Process Control Block Of Kernel	**********************/
 	current_process = 2;
 	process_control_blocks[2].state = process_state_running | process_state_daemon | process_entry_valid;
-	total_process = 2;
+	total_process = 3;
 }
 
 void scheduler_copy_descriptor(selector ldt_selector, selector selector)
@@ -95,7 +95,7 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	process_control_blocks[idx].ss = selector_new(stdldt_selector_ss, selector_local, privilege_system);
 	process_control_blocks[idx].esp = esp - sizeof(interrupt_stack_frame) - 1;
 	dword address = descriptor_get_base(&(stdldt->stack_segment)) + process_control_blocks[idx].esp;
-	interrupt_stack_frame* stack_frame = address;
+	interrupt_stack_frame* stack_frame = (void*)address;
 
 	stack_frame->cs = selector_new(stdldt_selector_cs, selector_local, descriptor_get_privilege(&stdldt->code_segment));
 	stack_frame->eip = eip;
@@ -103,13 +103,19 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	stack_frame->es = selector_new(stdldt_selector_es, selector_local, descriptor_get_privilege(&stdldt->edata_segment));
 	stack_frame->fs = selector_new(stdldt_selector_fs, selector_local, descriptor_get_privilege(&stdldt->fdata_segment));
 	stack_frame->gs = selector_new(stdldt_selector_gs, selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
-	descriptor_new(&gdt[idx], stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
-	stack_frame->ldt = selector_new(idx * sizeof(descriptor), selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
+	process_control_blocks[idx].ldt
+		= selector_new(idx * sizeof(descriptor), selector_global, descriptor_get_privilege(&stdldt->code_segment));
+	stack_frame->ldt = process_control_blocks[idx].ldt;
 	stack_frame->eflags = eflags;
-	
+
+	descriptor_new(&gdt[idx], stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
 	process_control_blocks[idx].stack_frame = process_control_blocks[idx].esp;
 	process_control_blocks[idx].state =
-		process_state_running | (initstate & process_state_switchable) | process_entry_valid;
+		process_state_ready | (initstate & process_state_switchable) | process_entry_valid;
+
+	gdt_pointer.base = &gdt;
+	gdt_pointer.limit = total_process * sizeof(descriptor) - 1;
+	asm_scheduler_set_gdt();
 }
 
 __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
@@ -117,6 +123,7 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 {
 	/**	Save Processor State	**/
 	process_control_blocks[current_process].stack_frame = stack_frame;
+	process_control_blocks[current_process].ldt = *ldt;	
 	process_control_blocks[current_process].esp = *esp;
 	process_control_blocks[current_process].ss = *ss;
 
@@ -126,39 +133,41 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 	/**	Common Process For All Processes **/
 	int i = 3;
 	for(; i < total_process; i ++)
-		if(process_control_blocks[i].state & process_state_fsm == process_state_sleeping)
+		if((process_control_blocks[i].state & process_state_fsm) == process_state_sleeping)
 	{
 		if(process_control_blocks[i].tag > 0) process_control_blocks[i].tag --;
-		else process_control_blocks[current_process].state
-			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_ready;
+		else process_control_blocks[i].state
+			= process_control_blocks[i].state & process_state_fsm_negate | process_state_ready;
 	}
 
-	/**	Determine The Next Process To Invoke	**/
 
+	/**	Determine The Next Process To Invoke	**/
 	int hasFound = 0;
 	for(i = current_process + 1; i < total_process; i ++)
-		if(process_control_blocks[i].state & process_state_fsm == process_state_ready)
+		if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
 		{
 			current_process = i;
 			hasFound = 1;
 			break;
 		}
-	if(!hasFound)
-		for(i = 3; i < total_process; i ++)
-			if(process_control_blocks[i].state & process_state_fsm == process_state_ready)
+	if(hasFound == 0)
+		for(i = 3; i < current_process; i ++)
+			if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
 		{
 			current_process = i;
 			hasFound = 1;
 			break;
 		}
-	if(!hasFound) current_process = 2;
-
+	if(hasFound == 0) current_process = 2;
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
+	process_control_blocks[current_process].state
+			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_running;
+
 	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
 	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
 
-	*ldt = process_control_blocks[current_process].stack_frame->ldt;
+	*ldt = process_control_blocks[current_process].ldt;
 	*ss = process_control_blocks[current_process].ss;
 	*esp = process_control_blocks[current_process].esp;
 

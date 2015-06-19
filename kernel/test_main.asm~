@@ -7,6 +7,7 @@ global runtime_stack
 global runtime_kernel_stack
 global test_main_stack_limit
 global test_main_kernel_stack_limit
+global asm_test_main_init
 
 extern video_put_char
 
@@ -44,3 +45,5 @@ extern test_main_init
 		push test_main
 		push test_main_stdldt
 		call test_main_init
+		add esp, 48
+		ret

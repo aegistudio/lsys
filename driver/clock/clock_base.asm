@@ -16,6 +16,7 @@ extern asm_interrupt_load_dataregs
 
 		mov dword[asm_clock_save_esp], esp
 		mov word[asm_clock_save_ss], ss
+		sldt [asm_clock_save_ldt]
 
 		push asm_clock_save_esp
 		push asm_clock_save_ss
@@ -27,9 +28,7 @@ extern asm_interrupt_load_dataregs
 		mov ecx, dword[asm_clock_save_ss]
 		lldt [asm_clock_save_ldt]
 		mov ss, cx
-		mov esp, ebx
-
-		push eax		; eax = return value (the return stack frame)
+		mov esp, ebx		; eax = return value (the return stack frame)
 		int_restore
 		add esp, 4
 		sti

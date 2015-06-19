@@ -115,7 +115,7 @@ tss;
 #define process_state_ready			0x0000
 #define process_state_running			0x0010
 #define process_state_waiting			0x0020	//This Is Required By Semaphore
-#define process_state_sleeping			0x0040
+#define process_state_sleeping			0x0030
 
 #define stdldt_selector_cs			0x0000
 #define stdldt_selector_ds			0x0008
@@ -146,8 +146,9 @@ typedef struct __pcb_t
 	dword tag;
 	interrupt_stack_frame* stack_frame;
 
-	selector ss;
 	dword esp;
+	selector ss;
+	selector ldt;
 
 	/** Will Be Updated When Process Switches! **/
 	selector kernel_ss;

@@ -6,6 +6,7 @@ extern kernel_interrupt_service
 
 extern video_put_char
 extern asm_video_brush_screen
+extern asm_test_main_init
 
 section .bss
 kernel.stack		resd	1024 * 2
@@ -14,7 +15,7 @@ kernel.stack_base:
 old_gdt_pointer		resd	6
 
 section .text
-kernel_main_test_string		db	"010", 0
+kernel_main_test_string		db	"010010", 0
 kernel_main:
 	; Resetting Stack And Global Descriptor Table.
 	mov esp, kernel.stack_base
@@ -33,13 +34,17 @@ kernel_main:
 
 	; Enable Some Interrupt And Set Their Routines
 	call kernel_interrupt_service
+
+	call asm_test_main_init
+
 	sti
 
-	print:
+;	print:
 
-	mov eax, 1
-	mov esi, 0x0002
-	mov edi, kernel_main_test_string
-	int 21h
+;	mov eax, 1
+;	mov esi, 0x0002
+;	mov edi, kernel_main_test_string
+;	int 21h
 
-	jmp print
+;	jmp print
+	jmp $
