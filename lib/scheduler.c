@@ -105,8 +105,11 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	stack_frame->gs = selector_new(stdldt_selector_gs, selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
 	descriptor_new(&gdt[idx], stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
 	stack_frame->ldt = selector_new(idx * sizeof(descriptor), selector_local, descriptor_get_privilege(&stdldt->graphic_segment));
-
+	stack_frame->eflags = eflags;
+	
 	process_control_blocks[idx].stack_frame = process_control_blocks[idx].esp;
+	process_control_blocks[idx].state =
+		process_state_running | (initstate & process_state_switchable) | process_entry_valid;
 }
 
 __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
