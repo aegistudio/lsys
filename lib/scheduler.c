@@ -97,7 +97,7 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	process_control_blocks[idx].kernel_ss = selector_new(stdldt_selector_ks, selector_local, privilege_system);
 	process_control_blocks[idx].kernel_esp = kernel_esp;
 	process_control_blocks[idx].ss = selector_new(stdldt_selector_ss, selector_local, privilege_system);
-	process_control_blocks[idx].esp = esp - sizeof(interrupt_stack_frame) - 1;
+	process_control_blocks[idx].esp = esp - sizeof(interrupt_stack_frame) - 4;
 
 	int i = 0;
 	byte* destin = &(kernel_ldt.kernel_stack_segment);
@@ -120,7 +120,7 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 
 	asm_scheduler_copy_stackframe(destin_selector, process_control_blocks[idx].esp, esp);
 
-	descriptor_new(&gdt[idx], stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
+	descriptor_new(&gdt[idx], (dword)stdldt, sizeof(standard_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
 	process_control_blocks[idx].stack_frame = process_control_blocks[idx].esp;
 	process_control_blocks[idx].state =
 		process_state_ready | (initstate & process_state_switchable) | process_entry_valid;

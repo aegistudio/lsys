@@ -54,6 +54,9 @@ asm_scheduler_copy_stackframe:
 	mov eax, dword[ss : ebp + 12]	; EAX = Begin
 	mov edx, scheduler_temp_stack_frame
 
+	mov dword[fs : eax], eax
+	add eax, 4
+
 	loop_copy_stack_frame:
 	mov ebx, dword[ss : ebp + 16]	; EBX = End
 	cmp eax, ebx
