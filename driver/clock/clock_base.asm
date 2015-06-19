@@ -29,8 +29,7 @@ extern asm_interrupt_load_dataregs
 		lldt [asm_clock_save_ldt]
 		mov ss, cx
 		mov esp, ebx		; eax = return value (the return stack frame)
-		pop esp
-		add esp, 4
+		add esp, 8
 		pop es
 		pop ds
 		pop fs

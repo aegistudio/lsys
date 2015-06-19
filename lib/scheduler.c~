@@ -47,7 +47,7 @@ __scheduler_export void scheduler_initialize()
 	scheduler_copy_descriptor(stdldt_selector_gs, scheduler_gs);
 
 	gdt_pointer.base = &gdt;
-	gdt_pointer.limit = 3 * sizeof(descriptor) - 1;		//1 Null LDT, 1 Global TSS, 1 LDT For Kernel (PID = 0),
+	gdt_pointer.limit = 3 * sizeof(descriptor) - 1;		//1 Null LDT, 1 Global TSS, 1 LDT For Kernel (PID = 2),
 	
 	descriptor_new(&gdt[0], 0, 0, 0, 0);
 	descriptor_new(&gdt[1], &global_tss, sizeof(tss) - 1, descriptor_tss | descriptor_present, privilege_system);
@@ -68,9 +68,9 @@ __scheduler_export void scheduler_initialize()
 	asm_scheduler_set_selectors();
 
 	/**************		Reset Process Control Block Of Kernel	**********************/
-	current_process = 2;
+	current_process = 0x20;
 	process_control_blocks[2].state = process_state_running | process_state_daemon | process_entry_valid;
-	total_process = 3;
+	total_process = 0x21;
 }
 
 void scheduler_copy_descriptor(selector ldt_selector, selector selector)
