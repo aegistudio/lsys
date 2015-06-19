@@ -47,37 +47,38 @@ __scheduler_export void scheduler_initialize()
 	scheduler_copy_descriptor(stdldt_selector_gs, scheduler_gs);
 
 	gdt_pointer.base = &gdt;
-	gdt_pointer.limit = 3 * sizeof(descriptor) - 1;		//1 Null LDT, 1 Global TSS, 1 LDT For Kernel (PID = 2),
+	gdt_pointer.limit = 9 * sizeof(descriptor) - 1;		//1 Null LDT, 6 Kernel GDT, 1 Global TSS, 1 Empty LDT.
 	
 	descriptor_new(&gdt[0], 0, 0, 0, 0);
-	descriptor_new(&gdt[1], &global_tss, sizeof(tss) - 1, descriptor_tss | descriptor_present, privilege_system);
-	descriptor_new(&gdt[2], &kernel_ldt, sizeof(kernel_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
+	// 1 ~ 6 For GDT.
+	descriptor_new(&gdt[7], &global_tss, sizeof(tss) - 1, descriptor_tss | descriptor_present, privilege_system);
+	descriptor_new(&gdt[8], &kernel_ldt, sizeof(kernel_ldt) - 1, descriptor_ldt | descriptor_present, privilege_system);
 
 	/*************		Reset Segment Registers			*********************/
-	scheduler_cs = selector_new(stdldt_selector_cs, selector_local, privilege_system);
-	scheduler_ds = selector_new(stdldt_selector_ds, selector_local, privilege_system);
-	scheduler_es = selector_new(stdldt_selector_es, selector_local, privilege_system);
-	scheduler_fs = selector_new(stdldt_selector_fs, selector_local, privilege_system);
-	scheduler_ss = selector_new(stdldt_selector_ss, selector_local, privilege_system);
-	scheduler_gs = selector_new(stdldt_selector_gs, selector_local, privilege_user);
+	scheduler_cs = selector_new(stdldt_selector_cs + 8, selector_global, privilege_system);
+	scheduler_ds = selector_new(stdldt_selector_ds + 8, selector_global, privilege_system);
+	scheduler_es = selector_new(stdldt_selector_es + 8, selector_global, privilege_system);
+	scheduler_fs = selector_new(stdldt_selector_fs + 8, selector_global, privilege_system);
+	scheduler_ss = selector_new(stdldt_selector_ss + 8, selector_global, privilege_system);
+	scheduler_gs = selector_new(stdldt_selector_gs + 8, selector_global, privilege_user);
 
 	asm_scheduler_set_gdt();
-	selector ldt = selector_new(2 * sizeof(descriptor), selector_global, privilege_system);
-	selector tr = selector_new(1 * sizeof(descriptor), selector_global, privilege_system);
+	selector ldt = selector_new(8 * sizeof(descriptor), selector_global, privilege_system);
+	selector tr = selector_new(7 * sizeof(descriptor), selector_global, privilege_system);
 	asm_scheduler_set_taskregs(ldt, tr);
 	asm_scheduler_set_selectors();
 
 	/**************		Reset Process Control Block Of Kernel	**********************/
-	current_process = 0x20;
-	process_control_blocks[2].state = process_state_running | process_state_daemon | process_entry_valid;
-	total_process = 0x21;
+	current_process = 8;
+	process_control_blocks[8].state = process_state_running | process_state_daemon | process_entry_valid;
+	total_process = 9;
 }
 
 void scheduler_copy_descriptor(selector ldt_selector, selector selector)
 {
 	byte* source_base = gdt_pointer.base + (selector & 0x0000fff8);
-	byte* destin_base = &kernel_ldt;
-	destin_base += (ldt_selector & 0x0000fff8);
+	byte* destin_base = gdt;
+	destin_base += (ldt_selector & 0x0000fff8) + 8;
 	int i = 0;
 	for(; i < 8; i ++) destin_base[i] = source_base[i];
 }
@@ -143,7 +144,7 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_ready;
 
 	/**	Common Process For All Processes **/
-	int i = 3;
+	int i = 9;
 	for(; i < total_process; i ++)
 		if((process_control_blocks[i].state & process_state_fsm) == process_state_sleeping)
 	{
@@ -163,14 +164,14 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 			break;
 		}
 	if(hasFound == 0)
-		for(i = 3; i < current_process; i ++)
+		for(i = 9; i < current_process; i ++)
 			if((process_control_blocks[i].state & process_state_fsm) == process_state_ready)
 		{
 			current_process = i;
 			hasFound = 1;
 			break;
 		}
-	if(hasFound == 0) current_process = 2;
+	if(hasFound == 0) current_process = 8;
 
 	/**	Prepare Kernel Stack And Runtime Stack Frame	**/
 	process_control_blocks[current_process].state
