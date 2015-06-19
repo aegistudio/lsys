@@ -22,8 +22,8 @@ extern asm_interrupt_load_dataregs
 		push asm_clock_save_ss
 		push asm_clock_save_ldt
 		call clock_processor
+		
 		add esp, 12
-
 		mov ebx, dword[asm_clock_save_esp]
 		mov ecx, dword[asm_clock_save_ss]
 		lldt [asm_clock_save_ldt]

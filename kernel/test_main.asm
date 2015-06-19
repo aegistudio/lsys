@@ -1,50 +1,77 @@
-global test_main_stdldt
-global test_main
-global end_of_test_main
-global test_main_data
-global end_of_test_main_data
-global runtime_stack
-global runtime_kernel_stack
-global test_main_stack_limit
-global test_main_kernel_stack_limit
 global asm_test_main_init
 
 extern video_put_char
 
 section .bss
-	test_main_data:
-	runtime_stack	resd	60
-	test_main_stack_limit equ $ - runtime_stack
-	runtime_kernel_stack	resd	60
-	test_main_kernel_stack_limit equ $ - runtime_kernel_stack
-	test_main_stdldt resd 60
-	end_of_test_main_data	equ $ - test_main_data
+	test_main_data_1:
+	end_of_test_main_data_1	equ $ - test_main_data_1
+
+	runtime_stack_1	resd	200
+	test_main_stack_limit_1 equ $ - runtime_stack_1
+	runtime_kernel_stack_1	resd	60
+	test_main_kernel_stack_limit_1 equ $ - runtime_kernel_stack_1
+	test_main_stdldt_1 resd 60
+	
+	test_main_data_2:
+	end_of_test_main_data_2	equ $ - test_main_data_2
+
+	runtime_stack_2	resd	200
+	test_main_stack_limit_2 equ $ - runtime_stack_2
+	runtime_kernel_stack_2	resd	60
+	test_main_kernel_stack_limit_2 equ $ - runtime_kernel_stack_2
+	test_main_stdldt_2 resd 60
 
 section .text
-test_main_string	db		"Inside test main now!", 0
+test_main_string_1	db		"Inside test main now!", 0
 extern test_main_init
-	test_main:
+	test_main_1:
 	mov eax, 1
-	mov esi, 0x0003
-	mov edi, test_main_string
+	mov esi, 0x04
+	mov edi, test_main_string_1
 	int 21h
-	jmp test_main
+	jmp test_main_1
 	ret
-	end_of_test_main	equ	$ - test_main
+	end_of_test_main_1	equ	$ - test_main_1
+
+test_main_string_2	db		"Inside test main now!", 0
+	test_main_2:
+	mov eax, 1
+	mov esi, 0x02
+	mov edi, test_main_string_2
+	int 21h
+	jmp test_main_2
+	ret
+	end_of_test_main_2	equ	$ - test_main_2
 
 	asm_test_main_init:
 		pushf
 		push 0fffffh
 		push 0b8000h
-		push test_main_kernel_stack_limit
-		push runtime_kernel_stack
-		push test_main_stack_limit
-		push runtime_stack
-		push end_of_test_main_data
-		push test_main_data
-		push end_of_test_main
-		push test_main
-		push test_main_stdldt
+		push test_main_kernel_stack_limit_1
+		push runtime_kernel_stack_1
+		push test_main_stack_limit_1
+		push runtime_stack_1
+		push end_of_test_main_data_1
+		push test_main_data_1
+		push end_of_test_main_1
+		push test_main_1
+		push test_main_stdldt_1
 		call test_main_init
 		add esp, 48
+
+		pushf
+		push 0fffffh
+		push 0b8000h
+		push test_main_kernel_stack_limit_2
+		push runtime_kernel_stack_2
+		push test_main_stack_limit_2
+		push runtime_stack_2
+		push end_of_test_main_data_2
+		push test_main_data_2
+		push end_of_test_main_2
+		push test_main_2
+		push test_main_stdldt_2
+		call test_main_init
+		add esp, 48
+
 		ret

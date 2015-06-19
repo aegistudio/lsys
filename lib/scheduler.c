@@ -131,6 +131,7 @@ __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dwo
 	asm_scheduler_set_gdt();
 }
 
+#include "driver/video.h"
 __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
 	interrupt_stack_frame* stack_frame)
 {

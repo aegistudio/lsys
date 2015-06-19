@@ -10,6 +10,7 @@ stdout_address_table:
 	dd	stdout_clear
 	dd	stdout_cursor
 
+extern asm_interrupt_load_dataregs
 asm_systemcall_stdout:
 	cli
 	push 0
@@ -45,6 +46,7 @@ asm_systemcall_stdout:
 	
 	int_restore
 	add esp, 4
+	jmp $
 	sti
 	iretd
 
