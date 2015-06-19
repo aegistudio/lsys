@@ -25,7 +25,6 @@ section .text
 test_main_string	db		"Inside test main now!", 0
 extern test_main_init
 	test_main:
-	jmp $
 	mov eax, 1
 	mov esi, 0x0002
 	mov edi, test_main_string

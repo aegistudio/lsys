@@ -12,8 +12,10 @@ stdout_address_table:
 
 asm_systemcall_stdout:
 	cli
-	push eax
-	jmp $
+	push 0
+	int_save
+	call asm_interrupt_load_dataregs
+
 	push cs
 	push dword[cs : stdout_address_table + (eax * 4)]
 	retf
@@ -40,7 +42,9 @@ asm_systemcall_stdout:
 		add esp, 8
 		jmp stdout_endofcall
 	stdout_endofcall:
-	pop eax
+	
+	int_restore
+	add esp, 4
 	sti
 	iretd
 
