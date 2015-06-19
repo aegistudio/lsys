@@ -19,17 +19,17 @@ section .bss
 	test_main_kernel_stack_limit equ $ - runtime_kernel_stack
 	test_main_stdldt resd 60
 	end_of_test_main_data	equ $ - test_main_data
-	
 
 section .text
 test_main_string	db		"Inside test main now!", 0
 extern test_main_init
 	test_main:
 	mov eax, 1
-	mov esi, 0x0002
+	mov esi, 0x0003
 	mov edi, test_main_string
 	int 21h
 	jmp test_main
+	ret
 	end_of_test_main	equ	$ - test_main
 
 	asm_test_main_init:
