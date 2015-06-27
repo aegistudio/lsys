@@ -114,8 +114,8 @@ tss;
 #define process_state_fsm_negate		0xff0f
 #define process_state_ready			0x0000
 #define process_state_running			0x0010
-#define process_state_waiting			0x0020	//This Is Required By Semaphore
-#define process_state_sleeping			0x0030
+#define process_state_waiting			0x0020	// Tag For The Next Item In The Queue.
+#define process_state_sleeping			0x0030	// Tag For The Waiting Time.
 
 #define stdldt_selector_cs			0x0000
 #define stdldt_selector_ds			0x0008

@@ -212,6 +212,73 @@ __scheduler_export void scheduler_sleep(dword mills, selector* ldt, selector* ss
 	*esp = process_control_blocks[current_process].esp;
 }
 
+/*******	Calling This Method Will Force Current Process To Discard Processor!	***/
+__scheduler_export void scheduler_wait(word* waiting_queue_head, word* waiting_queue_tail, selector* ldt, selector* ss,
+	dword* esp, interrupt_stack_frame* stack_frame)
+{
+	/**	Save Processor State	**/
+	process_control_blocks[current_process].stack_frame = stack_frame;
+	process_control_blocks[current_process].ldt = *ldt;	
+	process_control_blocks[current_process].esp = *esp;
+	process_control_blocks[current_process].ss = *ss;
+
+	process_control_blocks[current_process].state
+		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_waiting;
+
+	if(*waiting_queue_head == 0) *waiting_queue_head = current_process;
+	if(*waiting_queue_tail != 0)
+		process_control_blocks[*waiting_queue_tail].tag = current_process;
+	*waiting_queue_tail = current_process;
+	process_control_blocks[current_process].tag = 0;
+
+	scheduler_pick();
+
+	/**	Pick Up Another Process	**/
+	process_control_blocks[current_process].state
+			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_running;
+
+	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
+	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+
+	*ldt = 0;
+	*ldt = process_control_blocks[current_process].ldt;
+	*ss = process_control_blocks[current_process].ss;
+	*esp = process_control_blocks[current_process].esp;
+}
+
+/*******	Calling This Method Will Force Current Process To Discard Processor!	***/
+__scheduler_export void scheduler_invoke(word* waiting_queue_head, word* waiting_queue_tail, selector* ldt, selector* ss,
+	dword* esp, interrupt_stack_frame* stack_frame)
+{
+	/**	Save Processor State	**/
+	process_control_blocks[current_process].stack_frame = stack_frame;
+	process_control_blocks[current_process].ldt = *ldt;	
+	process_control_blocks[current_process].esp = *esp;
+	process_control_blocks[current_process].ss = *ss;
+
+	process_control_blocks[current_process].state
+		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_ready;
+
+	current_process = *waiting_queue_head;
+	*waiting_queue_head = process_control_blocks[*waiting_queue_head].tag;
+	if(*waiting_queue_head == 0) *waiting_queue_tail = 0;
+
+	// Actually We Could Run Other Processes.
+	// scheduler_pick();
+
+	/**	Pick Up Another Process	**/
+	process_control_blocks[current_process].state
+			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_running;
+
+	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
+	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+
+	*ldt = 0;
+	*ldt = process_control_blocks[current_process].ldt;
+	*ss = process_control_blocks[current_process].ss;
+	*esp = process_control_blocks[current_process].esp;
+}
+
 __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, selector* ss, dword* esp,
 	interrupt_stack_frame* stack_frame)
 {
