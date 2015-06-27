@@ -199,9 +199,10 @@ __scheduler_export interrupt_stack_frame* scheduler_schedule(selector* ldt, sele
 	for(; i < total_process; i ++)
 		if((process_control_blocks[i].state & process_state_fsm) == process_state_sleeping)
 	{
-		if(process_control_blocks[i].tag > 0) process_control_blocks[i].tag --;
-		else process_control_blocks[i].state
-			= process_control_blocks[i].state & process_state_fsm_negate | process_state_ready;
+		if(process_control_blocks[i].tag > 0)
+			process_control_blocks[i].tag --;
+		else	process_control_blocks[i].state
+				= process_control_blocks[i].state & process_state_fsm_negate | process_state_ready;
 	}
 
 	/**	Determine The Next Process To Invoke	**/

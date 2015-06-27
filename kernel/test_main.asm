@@ -25,19 +25,14 @@ section .text
 test_main_string_1	db		"Inside test main now!", 0
 extern test_main_init
 	test_main_1:
-	mov ebx, 0
-	test_main_1_begin:
-	and ebx, 0fffh
-	cmp ebx, 0
-	jne noprint1
-		mov eax, 1
-		mov esi, 0x04
-		mov edi, test_main_string_1
-		int 90h
-		mov ebx, 1
-	noprint1:
-	inc ebx
-	jmp test_main_1_begin
+	mov eax, 1
+	mov esi, 0x04
+	mov edi, test_main_string_1
+	int 90h		
+	mov eax, 1
+	mov edi, 0x02
+	int 93h
+	jmp test_main_1
 	ret
 	end_of_test_main_1	equ	$ - test_main_1
 
@@ -47,7 +42,8 @@ test_main_string_2	db		"Inside test main now!", 0
 	mov esi, 0x02
 	mov edi, test_main_string_2
 	int 90h
-	mov eax, 0
+	mov eax, 1
+	mov edi, 0x02
 	int 93h
 	jmp test_main_2
 	ret
