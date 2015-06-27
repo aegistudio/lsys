@@ -11,13 +11,15 @@ process_address_table:
 	dd	process_sleep
 	dd	process_terminate
 
+%include "include/interrupt.inc"
 extern asm_interrupt_load_dataregs
+extern global_tss
 asm_systemcall_process:
 	cli
 	push 0
 	int_save
 	call asm_interrupt_load_dataregs
-
+	
 	mov dword[asm_process_esp], esp
 	mov word[asm_process_ss], ss
 	sldt [asm_process_ldt]

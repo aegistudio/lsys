@@ -6,7 +6,7 @@ section .bss
 	test_main_data_1:
 	end_of_test_main_data_1	equ $ - test_main_data_1
 
-	runtime_stack_1	resd	60
+	runtime_stack_1	resd	200
 	test_main_stack_limit_1 equ $ - runtime_stack_1
 	runtime_kernel_stack_1	resd	60
 	test_main_kernel_stack_limit_1 equ $ - runtime_kernel_stack_1
@@ -15,7 +15,7 @@ section .bss
 	test_main_data_2:
 	end_of_test_main_data_2	equ $ - test_main_data_2
 
-	runtime_stack_2	resd	60
+	runtime_stack_2	resd	200
 	test_main_stack_limit_2 equ $ - runtime_stack_2
 	runtime_kernel_stack_2	resd	60
 	test_main_kernel_stack_limit_2 equ $ - runtime_kernel_stack_2
@@ -25,11 +25,19 @@ section .text
 test_main_string_1	db		"Inside test main now!", 0
 extern test_main_init
 	test_main_1:
-	mov eax, 1
-	mov esi, 0x04
-	mov edi, test_main_string_1
-	int 21h
-	jmp test_main_1
+	mov ebx, 0
+	test_main_1_begin:
+	and ebx, 0fffh
+	cmp ebx, 0
+	jne noprint1
+		mov eax, 1
+		mov esi, 0x04
+		mov edi, test_main_string_1
+	;	int 90h
+		mov ebx, 1
+	noprint1:
+	inc ebx
+	jmp test_main_1_begin
 	ret
 	end_of_test_main_1	equ	$ - test_main_1
 
@@ -38,7 +46,9 @@ test_main_string_2	db		"Inside test main now!", 0
 	mov eax, 1
 	mov esi, 0x02
 	mov edi, test_main_string_2
-	int 21h
+	int 90h
+	mov eax, 0
+	int 93h
 	jmp test_main_2
 	ret
 	end_of_test_main_2	equ	$ - test_main_2

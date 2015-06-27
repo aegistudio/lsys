@@ -1,0 +1,98 @@
+global asm_systemcall
+extern scheduler_sleep
+extern video_put_char
+extern video_put_string
+extern video_clear_screen
+extern video_set_cursor
+
+section .bss:
+	asm_syscall_esp		resd	1
+	asm_syscall_ss		resd	1
+	asm_syscall_ldt		resd	1
+
+section .text:
+systemcall_address_table:
+	; 0 ~ 3 For STDIO
+	dd	stdout_putchar
+	dd	stdout_putstring
+	dd	stdout_clear
+	dd	stdout_cursor
+	; 4 ~ 7 For PROCESS
+	dd	process_yield
+	dd	process_sleep
+	dd	process_terminate
+
+extern asm_interrupt_load_dataregs
+asm_systemcall:
+	cli
+	push 0
+	int_save
+	call asm_interrupt_load_dataregs
+	mov dword[asm_syscall_esp], esp
+	mov word[asm_syscall_ss], ss
+	sldt [asm_syscall_ldt]
+
+	push asm_syscall_esp
+	push asm_syscall_ss
+	push asm_syscall_ldt
+
+	push cs
+	push dword[cs : systemcall_address_table + (eax * 4)]
+	retf
+
+	stdout_putchar:
+		push esi
+		push edi
+		call video_put_char
+		add esp, 8
+		jmp endofcall
+	stdout_putstring:
+		push esi
+		push edi
+		call video_put_string
+		add esp, 8
+		jmp endofcall
+	stdout_clear:
+		call video_clear_screen
+		jmp endofcall
+	stdout_cursor:
+		push esi
+		push edi
+		call video_set_cursor
+		add esp, 8
+		jmp endofcall
+	process_yield:
+		push 0
+		call scheduler_sleep
+		add esp, 4
+		jmp endofcall
+	process_sleep:
+		push edi
+		call scheduler_sleep
+		add esp, 4
+		jmp endofcall
+	process_terminate:
+		jmp endofcall
+	endofcall:
+
+	add esp, 12
+	mov ebx, dword[asm_syscall_esp]
+	mov ecx, dword[asm_syscall_ss]
+	lldt [asm_syscall_ldt]
+
+	mov ss, cx
+	mov esp, ebx
+	jmp $
+
+	add esp, 8
+	pop es
+
+	jmp $
+	pop ds
+	pop fs
+	pop gs
+	popad
+	add esp, 4
+	sti
+	iretd
+
