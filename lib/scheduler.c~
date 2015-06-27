@@ -212,6 +212,7 @@ __scheduler_export void scheduler_sleep(dword mills, selector* ldt, selector* ss
 	*esp = process_control_blocks[current_process].esp;
 }
 
+#include "driver/video.h"
 /*******	Calling This Method Will Force Current Process To Discard Processor!	***/
 __scheduler_export void scheduler_wait(word* waiting_queue_head, word* waiting_queue_tail, selector* ldt, selector* ss,
 	dword* esp, interrupt_stack_frame* stack_frame)
@@ -260,10 +261,12 @@ __scheduler_export void scheduler_invoke(word* waiting_queue_head, word* waiting
 		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_ready;
 
 	current_process = *waiting_queue_head;
-	*waiting_queue_head = process_control_blocks[*waiting_queue_head].tag;
+	*waiting_queue_head = process_control_blocks[current_process].tag;
 	if(*waiting_queue_head == 0) *waiting_queue_tail = 0;
 
 	// Actually We Could Run Other Processes Instead.
+	//process_control_blocks[current_process].state
+	//		= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_ready;
 	// scheduler_pick();
 
 	/**	Pick Up Another Process	**/

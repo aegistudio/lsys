@@ -11,7 +11,7 @@
 
 typedef struct __semaphore_t
 {
-	word semaphore;
+	signed int semaphore;
 	word waiting_queue_head;
 	word waiting_queue_tail;
 }

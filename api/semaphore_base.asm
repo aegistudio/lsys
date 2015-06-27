@@ -51,7 +51,7 @@ asm_systemcall_semaphore:
 		add esp, 4
 		jmp semaphore_endofcall
 	semaphore_endofcall:
-	
+
 	add esp, 12
 	mov ebx, dword[asm_semaphore_esp]
 	mov ecx, dword[asm_semaphore_ss]

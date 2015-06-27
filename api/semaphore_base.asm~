@@ -47,11 +47,11 @@ asm_systemcall_semaphore:
 		jmp semaphore_endofcall
 	asm_semaphore_v:
 		push edi
-		call semaphore_v
+		;call semaphore_v
 		add esp, 4
 		jmp semaphore_endofcall
 	semaphore_endofcall:
-	
+
 	add esp, 12
 	mov ebx, dword[asm_semaphore_esp]
 	mov ecx, dword[asm_semaphore_ss]

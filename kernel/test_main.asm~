@@ -6,7 +6,7 @@ section .bss
 	test_main_data_1:
 	end_of_test_main_data_1	equ $ - test_main_data_1
 
-	runtime_stack_1	resd	200
+	runtime_stack_1	resd	400
 	test_main_stack_limit_1 equ $ - runtime_stack_1
 	runtime_kernel_stack_1	resd	60
 	test_main_kernel_stack_limit_1 equ $ - runtime_kernel_stack_1
@@ -15,7 +15,7 @@ section .bss
 	test_main_data_2:
 	end_of_test_main_data_2	equ $ - test_main_data_2
 
-	runtime_stack_2	resd	200
+	runtime_stack_2	resd	400
 	test_main_stack_limit_2 equ $ - runtime_stack_2
 	runtime_kernel_stack_2	resd	60
 	test_main_kernel_stack_limit_2 equ $ - runtime_kernel_stack_2
@@ -26,30 +26,56 @@ test_main_string_1	db		"Inside test main now!", 0
 extern test_main_init
 	test_main_1:
 	mov eax, 1
+	mov edi, 0			; P(Sem0)
+	int 94h
+
+	mov eax, 1
 	mov esi, 0x04
 	mov edi, test_main_string_1	; systemcall_putstring
+
 	int 90h		
 	mov eax, 1
 	mov edi, 0xf0
 	int 93h				; systemcall_sleep
+
 	mov eax, 2
-	int 93h				; systemcall_terminate
+	mov edi, 0			; V(Sem0)
+	int 94h
+
+	jmp test_main_1
+
 	end_of_test_main_1	equ	$ - test_main_1
 
 test_main_string_2	db		"Inside test main now!", 0
 	test_main_2:
+
+	mov eax, 1
+	mov edi, 0			; P(Sem0)
+	int 94h
+
 	mov eax, 1
 	mov esi, 0x02
 	mov edi, test_main_string_2
 	int 90h
+
 	mov eax, 1
 	mov edi, 0x70
 	int 93h
+
+	mov eax, 2
+	mov edi, 0			; V(Sem0)
+	int 94h
+
 	jmp test_main_2
 	ret
 	end_of_test_main_2	equ	$ - test_main_2
 
 	asm_test_main_init:
+		mov esi, 1
+		mov edi, 0	
+		mov eax, 0	; Sem[0] For semaphore_init
+		int 94h
+
 		pushf
 		push 0fffffh
 		push 0b8000h
