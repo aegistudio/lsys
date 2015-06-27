@@ -48,6 +48,7 @@ kernel.code: lib.code driver.code api.code
 	@gcc -c kernel/video.c -I include/ -o bin/kernel/video.obj
 	@gcc -c kernel/interrupt.c -I include/ -o bin/kernel/interrupt.obj
 	@nasm kernel/test_main.asm -o bin/kernel/test_main.obj -f elf32
+	@nasm kernel/barber.asm -o bin/kernel/barber.obj -f elf32
 	@gcc -c kernel/test_main.c -I include/ -o bin/kernel/test_main_c.obj
 	@ld bin/kernel/*.obj bin/lib/*.obj bin/driver/*.obj bin/api/*.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
@@ -57,6 +58,8 @@ api.code:
 	@gcc -c api/stdout.c -I include/ -o bin/api/stdout.obj
 	@nasm api/process_base.asm -o bin/api/process_base.obj -f elf32
 	@gcc -c api/process.c -I include/ -o bin/api/process.obj
+	@nasm api/semaphore_base.asm -o bin/api/semaphore_base.obj -f elf32
+	@gcc -c api/semaphore.c -I include/ -o bin/api/semaphore.obj
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."

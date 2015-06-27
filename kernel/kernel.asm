@@ -6,7 +6,8 @@ extern kernel_interrupt_service
 
 extern video_put_char
 extern asm_video_brush_screen
-extern asm_test_main_init
+;extern asm_test_main_init
+extern asm_barber_init
 
 section .bss
 kernel.stack		resd	1024 * 2
@@ -36,14 +37,7 @@ kernel_main:
 	call kernel_interrupt_service
 
 	sti
-	call asm_test_main_init
+	;call asm_test_main_init
+	call asm_barber_init
 
-;	print:
-
-;	mov eax, 1
-;	mov esi, 0x0002
-;	mov edi, kernel_main_test_string
-;	int 21h
-
-;	jmp print
 	jmp $

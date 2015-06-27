@@ -1,0 +1,261 @@
+global asm_barber_init
+
+barber_chair			equ	0
+barber_chair_init_value		equ	1
+
+waiting_chair			equ	1
+waiting_chair_init_value	equ	3
+
+customers			equ	2
+customers_init_value		equ	0
+
+serve_finished			equ	3
+serve_finished_init_value	equ	0
+
+section .bss
+	barber_data:
+	end_of_barber_data	equ $ - barber_data
+	runtime_stack_barber		resd	200
+	barber_runtime_stack_limit	equ	$ - runtime_stack_barber
+	kernel_stack_barber		resd	100
+	barber_kernel_stack_limit	equ	$ - kernel_stack_barber
+	barber_stdlst			resd	60
+
+	customer1_data:
+	customer1_index		resd	1
+	customer1_counter	resd	1
+	end_of_customer1_data	equ $ - customer1_data
+	runtime_stack_customer1		resd	200
+	customer1_runtime_stack_limit	equ	$ - runtime_stack_customer1
+	kernel_stack_customer1		resd	100
+	customer1_kernel_stack_limit	equ	$ - kernel_stack_customer1
+	customer1_stdlst		resd	60
+	
+	customer2_data:
+	customer2_index		resd	1
+	customer2_counter	resd	1
+	end_of_customer2_data	equ $ - customer2_data
+	runtime_stack_customer2		resd	200
+	customer2_runtime_stack_limit	equ	$ - runtime_stack_customer2
+	kernel_stack_customer2		resd	100
+	customer2_kernel_stack_limit	equ	$ - kernel_stack_customer2
+	customer2_stdlst		resd	60
+
+	customer3_data:
+	customer3_index		resd	1
+	customer3_counter	resd	1
+	end_of_customer3_data	equ $ - customer3_data
+	runtime_stack_customer3		resd	200
+	customer3_runtime_stack_limit	equ	$ - runtime_stack_customer3
+	kernel_stack_customer3		resd	100
+	customer3_kernel_stack_limit	equ	$ - kernel_stack_customer3
+	customer3_stdlst		resd	60
+
+section .text
+extern test_main_init
+barber:
+	mov eax, 1
+	mov edi, barber_initialized
+	mov esi, 0x01
+	int 90h
+
+	barber_loop:
+		mov eax, 1
+		mov edi, customers		; semaphore_p(customers)
+		int 94h
+
+		mov eax, 1
+		mov edi, barber_awake
+		mov esi, 0x01
+		int 90h				; video_putstring(barber_awake, 0x01)
+
+		mov eax, 1
+		mov edi, 10
+		int 93h				; process_sleep(2)
+
+		mov eax, 1
+		mov edi, barber_has_cut_hair
+		mov esi, 0x01
+		int 90h				; video_putstring(barber_has_cut_hair, 0x01)
+
+
+		mov eax, 2
+		mov edi, serve_finished		; semaphore_v(serve_finished)
+		int 94h
+
+		mov eax, 2
+		mov edi, barber_chair		; semaphore_v(barber_chair)
+		int 94h
+	jmp barber_loop
+barber_initialized	db		"Barber initalized.", 0
+barber_awake		db		"Barber awake!", 0
+barber_has_cut_hair	db		"Barber has cut hair!", 0
+
+end_of_barber	equ	$ - barber
+
+customer:
+	mov dword[ds : customer1_counter - customer1_data], 0	; set customer_id := 0
+	mov esi, dword[ds : customer1_index - customer1_data]	; set color.
+
+	mov eax, 1
+	mov edi, customer_initialized
+	int 90h
+
+	customer_loop:
+		mov eax, 1
+		mov edi, waiting_chair
+		int 94h				; semaphore_p(waiting_chair)
+
+		
+
+		mov eax, 1
+		mov edi, customer_prefix	; video_putstring("Customer ", color)
+		int 90h
+
+		mov eax, 0
+		mov edi, dword[ds : customer1_counter - customer1_data]
+		add edi, '0'
+		int 90h				; video_putchar('0' + customer_id, color)
+
+		mov eax, 1
+		mov edi, has_come_and_waiting
+		int 90h				; video_putstring(" has come and waiting!", color)
+
+		mov eax, 1
+		mov edi, barber_chair		; semaphore_p(barber_chair)
+		int 94h
+
+		mov eax, 2
+		mov edi, waiting_chair		; semaphore_v(waiting_chair)
+		int 94h
+
+		mov eax, 2
+		mov edi, customers		; semaphore_v(customers)
+		int 94h
+
+		mov eax, 1
+		mov edi, customer_prefix	; video_putstring("Customer ", color)
+		int 90h
+
+		mov eax, 0
+		mov edi, dword[ds : customer1_counter - customer1_data]
+		add edi, '0'
+		int 90h				; video_putchar('0' + customer_id, color)
+
+		mov eax, 1
+		mov edi, get_served
+		int 90h				; video_putstring(" get served.", color)
+
+		mov eax, 1
+		mov edi, serve_finished
+		int 94h				; semaphore_p(serve_finished)
+
+		mov eax, 1
+		mov edi, customer_prefix	; video_putstring("Customer ", color)
+		int 90h
+
+		mov eax, 0
+		mov edi, dword[ds : customer1_counter - customer1_data]
+		add edi, '0'
+		int 90h				; video_putchar('0' + customer_id, color)
+
+		mov eax, 1
+		mov edi, leaves
+		int 90h				; video_putstring(" leaves.", color)
+
+		inc dword[ds : customer1_counter - customer1_data]
+	jmp customer_loop
+customer_initialized	db		"Customer initialized (identify by color).", 0
+customer_prefix		db		"Customer ", 0
+has_come_and_waiting	db		" has come and waiting!", 0
+get_served		db		" gets served!", 0
+leaves			db		" leaves.", 0
+
+end_of_customer	equ	$ - customer
+
+	asm_barber_init:
+		mov eax, 0
+		mov edi, barber_chair
+		mov esi, barber_chair_init_value
+		int 94h
+
+		mov eax, 0
+		mov edi, waiting_chair
+		mov esi, waiting_chair_init_value
+		int 94h
+
+		mov eax, 0
+		mov edi, customers
+		mov esi, customers_init_value
+		int 94h
+
+		mov eax, 0
+		mov edi, serve_finished
+		mov esi, serve_finished_init_value
+		int 94h
+
+		mov dword[customer1_index], 0x02
+		mov dword[customer2_index], 0x03
+		mov dword[customer3_index], 0x04
+
+		pushf
+		push 0fffffh
+		push 0b8000h
+		push barber_kernel_stack_limit
+		push kernel_stack_barber
+		push barber_runtime_stack_limit
+		push runtime_stack_barber
+		push end_of_barber_data
+		push barber_data
+		push end_of_barber
+		push barber
+		push barber_stdlst
+		call test_main_init
+		add esp, 48
+
+		pushf
+		push 0fffffh
+		push 0b8000h
+		push customer1_kernel_stack_limit
+		push kernel_stack_customer1
+		push customer1_runtime_stack_limit
+		push runtime_stack_customer1
+		push end_of_customer1_data
+		push customer1_data
+		push end_of_customer
+		push customer
+		push customer1_stdlst
+		call test_main_init
+		add esp, 48
+
+		pushf
+		push 0fffffh
+		push 0b8000h
+		push customer2_kernel_stack_limit
+		push kernel_stack_customer2
+		push customer2_runtime_stack_limit
+		push runtime_stack_customer2
+		push end_of_customer2_data
+		push customer2_data
+		push end_of_customer
+		push customer
+		push customer2_stdlst
+		call test_main_init
+		add esp, 48
+
+		pushf
+		push 0fffffh
+		push 0b8000h
+		push customer3_kernel_stack_limit
+		push kernel_stack_customer3
+		push customer1_runtime_stack_limit
+		push runtime_stack_customer3
+		push end_of_customer3_data
+		push customer3_data
+		push end_of_customer
+		push customer
+		push customer3_stdlst
+		call test_main_init
+		add esp, 48
+
+		ret

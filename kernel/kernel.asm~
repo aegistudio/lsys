@@ -36,14 +36,7 @@ kernel_main:
 	call kernel_interrupt_service
 
 	sti
-	call asm_test_main_init
+	;call asm_test_main_init
+	call asm_barber_init
 
-;	print:
-
-;	mov eax, 1
-;	mov esi, 0x0002
-;	mov edi, kernel_main_test_string
-;	int 21h
-
-;	jmp print
 	jmp $

@@ -50,7 +50,7 @@ test_main_string_2	db		"Inside test main now!", 0
 	test_main_2:
 
 	mov eax, 1
-	mov edi, 0			; P(Sem1)
+	mov edi, 1			; P(Sem1)
 	int 94h
 
 	mov eax, 1

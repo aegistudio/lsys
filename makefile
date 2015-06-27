@@ -48,6 +48,7 @@ kernel.code: lib.code driver.code api.code
 	@gcc -c kernel/video.c -I include/ -o bin/kernel/video.obj
 	@gcc -c kernel/interrupt.c -I include/ -o bin/kernel/interrupt.obj
 	@nasm kernel/test_main.asm -o bin/kernel/test_main.obj -f elf32
+	@nasm kernel/barber.asm -o bin/kernel/barber.obj -f elf32
 	@gcc -c kernel/test_main.c -I include/ -o bin/kernel/test_main_c.obj
 	@ld bin/kernel/*.obj bin/lib/*.obj bin/driver/*.obj bin/api/*.obj -o bin/kernel/kernel.elf --oformat elf32-i386 -e kernel_main -Ttext 0x30400
 
