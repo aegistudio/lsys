@@ -38,6 +38,7 @@ lib.code:
 	@echo "Compiling The Code Of Libraries..."
 	@gcc -c lib/segmentation.c -I include/ -o bin/lib/segmentation.obj
 	@gcc -c lib/scheduler.c -I include/ -o bin/lib/scheduler.obj
+	@gcc -c lib/semaphore.c -I include/ -o bin/lib/semaphore.obj
 	@nasm lib/scheduler_base.asm -o bin/lib/scheduler_base.obj -f elf32
 
 kernel.code: lib.code driver.code api.code
@@ -56,6 +57,8 @@ api.code:
 	@gcc -c api/stdout.c -I include/ -o bin/api/stdout.obj
 	@nasm api/process_base.asm -o bin/api/process_base.obj -f elf32
 	@gcc -c api/process.c -I include/ -o bin/api/process.obj
+	@nasm api/semaphore_base.asm -o bin/api/semaphore_base.obj -f elf32
+	@gcc -c api/semaphore.c -I include/ -o bin/api/semaphore.obj
 
 boot.sector.image: boot.sector.code lsys.img
 	@echo "Writting Boot Sector Binaries To Image..."

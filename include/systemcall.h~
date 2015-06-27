@@ -26,5 +26,9 @@ __systemcall_api void systemcall_stdout_initialize();
 __systemcall_api void systemcall_process_initialize();
 
 #define systemcall_semaphore	0x94
+#define semaphore_init		0x00	/** EDI = SEMAPHORE_ID, ESI = INITIAL_VALUE **/
+#define semaphore_p		0x01	/** EDI = SEMAPHORE_ID **/
+#define semaphore_v		0x02	/** EDI = SEMAPHORE_ID **/
+__systemcall_api void systemcall_semaphore_initialize();
 
 #endif

@@ -2,9 +2,10 @@
 #define __semaphore_c__
 
 #include "define.h"
+#include "semaphore.h"
 #include "process.h"
 
-semaphore semaphore_list[0x0ffff];
+semaphore semaphore_list[0x0fff];
 
 __public interrupt_stack_frame* semaphore_init(int sem_id, int init_value, selector* ldt, selector* ss, dword* esp, interrupt_stack_frame* stack_frame)
 {

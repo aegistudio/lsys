@@ -263,7 +263,7 @@ __scheduler_export void scheduler_invoke(word* waiting_queue_head, word* waiting
 	*waiting_queue_head = process_control_blocks[*waiting_queue_head].tag;
 	if(*waiting_queue_head == 0) *waiting_queue_tail = 0;
 
-	// Actually We Could Run Other Processes.
+	// Actually We Could Run Other Processes Instead.
 	// scheduler_pick();
 
 	/**	Pick Up Another Process	**/
