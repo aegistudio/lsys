@@ -154,6 +154,36 @@ __private void scheduler_pick()
 }
 
 /*******	Calling This Method Will Force Current Process To Discard Processor!	***/
+__scheduler_export void scheduler_terminate(selector* ldt, selector* ss,
+	dword* esp, interrupt_stack_frame* stack_frame)
+{
+	/**	Recycle The Resource Of The Current Process.			**/
+	if(current_process < total_process - 1)
+	{
+		byte* destin = &process_control_blocks[current_process];
+		byte* source = &process_control_blocks[total_process - 1];
+
+		int i = 0;
+		for(i = 0; i < sizeof(process); i ++) destin[i] = source[i];
+	}
+	total_process --;
+
+	scheduler_pick();
+
+	/**	Pick Up Another Process	**/
+	process_control_blocks[current_process].state
+			= process_control_blocks[current_process].state & process_state_fsm_negate | process_state_running;
+
+	global_tss.stacks[0].esp = process_control_blocks[current_process].kernel_esp;
+	global_tss.stacks[0].ss = process_control_blocks[current_process].kernel_ss;
+
+	*ldt = 0;
+	*ldt = process_control_blocks[current_process].ldt;
+	*ss = process_control_blocks[current_process].ss;
+	*esp = process_control_blocks[current_process].esp;
+}
+
+/*******	Calling This Method Will Force Current Process To Discard Processor!	***/
 __scheduler_export void scheduler_sleep(dword mills, selector* ldt, selector* ss,
 	dword* esp, interrupt_stack_frame* stack_frame)
 {

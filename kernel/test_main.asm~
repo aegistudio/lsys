@@ -27,13 +27,13 @@ extern test_main_init
 	test_main_1:
 	mov eax, 1
 	mov esi, 0x04
-	mov edi, test_main_string_1
+	mov edi, test_main_string_1	; systemcall_putstring
 	int 90h		
 	mov eax, 1
-	mov esi, 0x02
-	int 93h
-	jmp test_main_1
-	ret
+	mov edi, 0xf0
+	int 93h				; systemcall_sleep
+	mov eax, 2
+	int 93h				; systemcall_terminate
 	end_of_test_main_1	equ	$ - test_main_1
 
 test_main_string_2	db		"Inside test main now!", 0
@@ -43,7 +43,7 @@ test_main_string_2	db		"Inside test main now!", 0
 	mov edi, test_main_string_2
 	int 90h
 	mov eax, 1
-	mov esi, 0x02
+	mov edi, 0x70
 	int 93h
 	jmp test_main_2
 	ret

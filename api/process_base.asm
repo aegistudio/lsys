@@ -1,5 +1,6 @@
 global asm_systemcall_process
 extern scheduler_sleep
+extern scheduler_terminate
 section .bss:
 	asm_process_esp		resd	1
 	asm_process_ss		resd	1
@@ -13,7 +14,6 @@ process_address_table:
 
 %include "include/interrupt.inc"
 extern asm_interrupt_load_dataregs
-extern global_tss
 asm_systemcall_process:
 	cli
 	push 0
@@ -43,6 +43,7 @@ asm_systemcall_process:
 		add esp, 4
 		jmp process_endofcall
 	process_terminate:
+		call scheduler_terminate
 		jmp process_endofcall
 	process_endofcall:
 	
