@@ -32,14 +32,14 @@ extern test_main_init
 	mov eax, 1
 	mov esi, 0x04
 	mov edi, test_main_string_1	; systemcall_putstring
-
-	int 90h		
-	mov eax, 1
-	mov edi, 0xf0
-	int 93h				; systemcall_sleep
+	int 90h
+		
+	;mov eax, 1
+	;mov edi, 0xf0
+	;int 93h				; systemcall_sleep
 
 	mov eax, 2
-	mov edi, 0			; V(Sem0)
+	mov edi, 1			; V(Sem1)
 	int 94h
 
 	jmp test_main_1
@@ -50,7 +50,7 @@ test_main_string_2	db		"Inside test main now!", 0
 	test_main_2:
 
 	mov eax, 1
-	mov edi, 0			; P(Sem0)
+	mov edi, 1			; P(Sem1)
 	int 94h
 
 	mov eax, 1
@@ -58,9 +58,9 @@ test_main_string_2	db		"Inside test main now!", 0
 	mov edi, test_main_string_2
 	int 90h
 
-	mov eax, 1
-	mov edi, 0x70
-	int 93h
+	;mov eax, 1
+	;mov edi, 0x70
+	;int 93h
 
 	mov eax, 2
 	mov edi, 0			; V(Sem0)
@@ -73,7 +73,12 @@ test_main_string_2	db		"Inside test main now!", 0
 	asm_test_main_init:
 		mov esi, 1
 		mov edi, 0	
-		mov eax, 0	; Sem[0] For semaphore_init
+		mov eax, 0	; Sem[0] For semaphore_1
+		int 94h
+
+		mov esi, 0
+		mov edi, 1	
+		mov eax, 0	; Sem[1] For semaphore_2
 		int 94h
 
 		pushf
