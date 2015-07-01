@@ -112,10 +112,9 @@ customer:
 		mov edi, customer_prefix	; video_putstring("Customer ", color)
 		int 90h
 
-		mov eax, 0
+		mov eax, 4
 		mov edi, dword[ds : customer1_counter - customer1_data]
-		add edi, '0'
-		int 90h				; video_putchar('0' + customer_id, color)
+		int 90h				; video_putinteger(customer_id, color)
 
 		mov eax, 1
 		mov edi, has_come_and_waiting
@@ -137,10 +136,9 @@ customer:
 		mov edi, customer_prefix	; video_putstring("Customer ", color)
 		int 90h
 
-		mov eax, 0
+		mov eax, 4
 		mov edi, dword[ds : customer1_counter - customer1_data]
-		add edi, '0'
-		int 90h				; video_putchar('0' + customer_id, color)
+		int 90h				; video_putinteger(customer_id, color)
 
 		mov eax, 1
 		mov edi, get_served
@@ -154,10 +152,9 @@ customer:
 		mov edi, customer_prefix	; video_putstring("Customer ", color)
 		int 90h
 
-		mov eax, 0
+		mov eax, 4
 		mov edi, dword[ds : customer1_counter - customer1_data]
-		add edi, '0'
-		int 90h				; video_putchar('0' + customer_id, color)
+		int 90h				; video_putinteger('0' + customer_id, color)
 
 		mov eax, 1
 		mov edi, leaves

@@ -16,6 +16,7 @@
 #define stdout_putstring	0x01	/** EDI = BEGIN OF STRING ADDRESS, ESI = COLOR OF THE STRING **/
 #define stdout_clear		0x02	/** NO PARAM IS NEEDED	**/
 #define stdout_cursor		0x03	/** EDI = THE ROW OF THE CURSOR, ESI = THE COLUMN OF THE CURSOR **/
+#define stdout_putinteger	0x04	/** EDI = THE VALUE OF THE INTEGER **/
 
 __systemcall_api void systemcall_stdout_initialize();
 

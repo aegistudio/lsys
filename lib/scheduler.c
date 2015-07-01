@@ -86,6 +86,7 @@ void scheduler_copy_descriptor(selector ldt_selector, selector selector)
 extern interrupt_stack_frame* asm_scheduler_get_stackframe();
 extern void asm_scheduler_copy_stackframe(selector destin_selector, selector begin, selector end);
 
+#include "driver/video.h"
 /**		This Method Could Only Be Called In Kernel			***/
 __scheduler_export void scheduler_execute(byte* pname, standard_ldt* stdldt, dword eip, dword esp, dword eflags,
 	dword kernel_esp, word initstate)
